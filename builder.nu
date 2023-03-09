@@ -1,11 +1,19 @@
-let-env out = $env.out
 let nushellVersion = $env.NUSHELL_VERSION
 
-# Helper functions
+## Helper functions
+
 def banner [text: string] {
-  echo $">>> (ansi green)($text)(ansi reset)"
+  echo $"(ansi red)>>>(ansi reset) (ansi green)($text)(ansi reset)"
 }
 
+def runPhase [name: string, phase: string] {
+  if $phase != "" {
+    echo $"Running ($name)Phase..."
+    nu -c $"source ($env.envFile); ($phase)"
+  } else {
+    echo $"Skipping ($name)Phase..."
+  }
+}
 
 # Info about the derivation
 banner "INFO"
@@ -35,19 +43,9 @@ let-env PATH = ($env.buildInputs | split row " " | each { |pkg| $"($pkg)/bin" } 
 
 banner "REALISATION"
 
-if $env.buildPhase != "" {
-  echo "Running buildPhase..."
-  nu -c $env.buildPhase
-} else {
-  echo "Skipping buildPhase"
-}
+runPhase "build" $env.buildPhase
 
-if $env.installPhase != "" {
-  echo "Running installPhase..."
-  nu -c $env.installPhase
-} else {
-  echo "Skipping installPhase"
-}
+runPhase "install" $env.installPhase
 
 banner "DONE!"
 
