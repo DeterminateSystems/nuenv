@@ -8,7 +8,10 @@ def substitute [
   --replace (-r): string,
   --with (-w): string
 ] {
-  (open $file | str replace -a $replace $with) | save $out
+  let orig = (open $file)
+  rm $file
+  let s = ($orig | str replace -a $replace $with)
+  $s | save $out
 }
 
 # Substitute, in place, all instances of the --replace string with the --with

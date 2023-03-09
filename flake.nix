@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/release-22.11";
+    nixpkgs.url = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -26,7 +26,7 @@
           }:
 
           let
-            baseInputs = (with pkgs; [ nushell coreutils cc clang ]);
+            baseInputs = (with pkgs; [ nushell ]);
           in
           derivation {
             inherit name system src buildPhase installPhase;
