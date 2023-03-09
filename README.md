@@ -1,4 +1,4 @@
-# A Nushell environment for Nix
+# nuenv, a Nushell environment for Nix
 
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
 
@@ -66,9 +66,11 @@ There are a few things that you can do in the current standard environment that 
   };
 
   outputs = { self, nixpkgs, nix-nushell-env }: let
-    system = "...";
+    system = "x86_64-linux";
+    overlays = [ nix-nushell-env.overlays.default ];
+    pkgs = import nixpkgs { inherit overlays system; };
   in {
-    packages.${system}.default = nix-nushell-env.lib.mkNushellDerivation {
+    packages.${system}.default = pkgs.nuenv.mkDerivation {
       name = "hello";
       pkgs = import nixpkgs { inherit system; };
       src = ./.;
