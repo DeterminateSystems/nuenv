@@ -1,13 +1,13 @@
 ## Functions that can be used in derivation phases
 
 def err [
-  msg: string, # The error string
+  msg: string, # The error string to log
 ] {
-  error make --unspanned { msg: $"(ansi red)x(ansi reset) ($msg)" }
+  error make { msg: $"(ansi red)x(ansi reset) ($msg)" }
 }
 
 def ensureFileExists [
-  file: path, # The path to check
+  file: path, # The path to check for existence
 ] {
   if not ($file | path exists) {
     err $"File not found at:\n  ($file)"
@@ -18,8 +18,8 @@ def ensureFileExists [
 def substitute [
   file: path, # The target file
   out: path, # The output file
-  --replace (-r): string, # The string to replace in $file
-  --with (-w): string # The replacement for $replace
+  --replace (-r): string, # The string to replace in <file>
+  --with (-w): string # The replacement for <replace>
 ] {
   ensureFileExists $file
 
@@ -33,11 +33,11 @@ def substitute [
   $s | save $out
 }
 
-# Substitute all instances of the $replace string with the $with string in <file>.
+# Substitute all instances of <replace> in <file> with <with>.
 def substituteInPlace [
   file: path, # The target file
-  --replace (-r): string, # The string to replace in $file
-  --with (-w): string # The replacement for $replace
+  --replace (-r): string, # The string to replace in <file>
+  --with (-w): string # The replacement for <replace>
 ] {
   substitute $file $file --replace $replace --with $with
 }
