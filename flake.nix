@@ -19,14 +19,14 @@
           { pkgs              # Pinned Nixpkgs
           , name              # The name of the derivation
           , system            # The build system
-          , src               # The derivation's sources
+          , src ? ./.         # The derivation's sources
           , buildPhase ? ""   # Same as buildPhase in stdenv
           , installPhase ? "" # Same as installPhase in stdenv
           , buildInputs ? [ ] # Same as buildInputs in stdenv
           }:
 
           let
-            baseInputs = (with pkgs; [ nushell coreutils ]);
+            baseInputs = (with pkgs; [ nushell coreutils cc clang ]);
           in
           derivation {
             inherit name system src buildPhase installPhase;
@@ -42,31 +42,34 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ go_1_18 nushell ];
+          packages = with pkgs; [ go nushell ];
         };
       });
 
       packages = forAllSystems ({ pkgs, system }: {
         default =
-          let
-            inText = "go";
-            outText = "golang";
-          in
           self.lib.mkNushellDerivation {
             name = "write-go-version";
             inherit pkgs system;
-            src = ./.;
-            buildInputs = with pkgs; [ go_1_18 ];
+            buildInputs = with pkgs; [ go ];
             buildPhase = ''
-              go version | save go-version.txt
-              go help | save help.txt
-              substitute help.txt go-help.txt --replace ${inText} --with ${outText}
-              substituteInPlace go-version.txt --replace ${inText} --with ${outText}
+              let versionFile = "go-version.txt"
+              echo $"Writing version info to ($versionFile)"
+              go version | save $versionFile
+
+              let helpFile = "go-help.txt"
+              echo $"Writing help info to ($helpFile)"
+              go help | save $helpFile
+
+              [$versionFile $helpFile] | each {|f|
+                substituteInPlace $f --replace go --with golang
+                substituteInPlace $f --replace Go --with GOLANG
+              }
             '';
             installPhase = ''
               let share = $"($env.out)/share"
               mkdir $share
-              [go-help.txt go-version.txt] | each { |file| mv $file $share; }
+              [go-help.txt go-version.txt] | each { |file| mv $file $share }
             '';
           };
 
@@ -82,3 +85,4 @@
       });
     };
 }
+

@@ -1,4 +1,5 @@
 ## Helper functions
+let here = $env.PWD
 
 # Splashy, colored banner text
 def banner [text: string] {
@@ -43,6 +44,10 @@ banner "SETUP"
 # Create the output directory (realisation fails otherwise)
 echo "Creating output directory..."
 mkdir $env.out
+
+# Copy sources
+echo "Copying sources..."
+cp -r $"($env.src)/**/*" $here
 
 # Add buildInputs to the PATH
 let inputs = ($env.__buildInputs | split row " ")
