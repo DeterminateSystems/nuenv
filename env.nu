@@ -17,4 +17,8 @@ def substituteInPlace [
   }
 
   echo $'Substituting "($with)" for "($replace)" in ($file)'
+
+  let newFile = (cat $file | str replace -a $replace $with)
+
+  $newFile | save $file
 }

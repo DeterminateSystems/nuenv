@@ -32,9 +32,11 @@
             inherit name system src buildPhase installPhase;
             builder = "${pkgs.nushell}/bin/nu";
             args = [ ./builder.nu ];
-            NUSHELL_VERSION = pkgs.nushell.version;
-            envFile = ./env.nu;
-            buildInputs = buildInputs ++ baseInputs;
+
+            # Attributes passed to the environment (prefaced with __ to avoid naming collisions)
+            __nushell_version = pkgs.nushell.version;
+            __envFile = ./env.nu;
+            __buildInputs = buildInputs ++ baseInputs;
           };
       };
 
