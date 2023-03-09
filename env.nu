@@ -1,10 +1,16 @@
 ## Functions that can be used in derivation phases
 
+def err [
+  msg: string, # The error string
+] {
+  error make --unspanned { msg: $"(ansi red)x(ansi reset) ($msg)" }
+}
+
 def ensureFileExists [
-  file: path # The path to check
+  file: path, # The path to check
 ] {
   if not ($file | path exists) {
-    error make { msg: $"File not found at:\n  ($file)" }
+    err $"File not found at:\n  ($file)"
   }
 }
 

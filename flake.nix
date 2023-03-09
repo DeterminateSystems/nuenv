@@ -71,6 +71,8 @@
                 substituteInPlace $f --replace go --with golang
                 substituteInPlace $f --replace Go --with GOLANG
               }
+
+              substituteInPlace non-existent.txt --replace goo --with bar
             '';
             installPhase = ''
               let share = $"($env.out)/share"
