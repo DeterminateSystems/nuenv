@@ -32,7 +32,7 @@
           }:
 
           let
-            baseInputs = (with pkgs; [ nushell tree ]);
+            baseInputs = (with pkgs; [ nushell ]);
           in
           derivation {
             inherit name src system buildPhase installPhase;

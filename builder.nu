@@ -9,7 +9,7 @@ def banner [text: string] {
 # Run a derivation phase (skip if empty)
 def runPhase [
   name: string,
-  phase: string
+  phase: string,
 ] {
   if $phase != "" {
     echo $"Running ($name)..."
@@ -57,8 +57,6 @@ let-env PATH = ($inputs
 # Copy sources
 echo "Copying sources..."
 cp -r $"($env.src)/**/*" $here
-
-tree $env.src
 
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"

@@ -8,12 +8,12 @@ def ensureFileExists [
   }
 }
 
-# Substitute all instances of the $replace string with the $with string in <file> and output the resulting string to <out>.
+# Substitute all instances of <replace> in <file> with <with> and output the resulting string to <out>.
 def substitute [
-  file: path,
-  out: path,
-  --replace (-r): string,
-  --with (-w): string
+  file: path, # The target file
+  out: path, # The output file
+  --replace (-r): string, # The string to replace in $file
+  --with (-w): string # The replacement for $replace
 ] {
   ensureFileExists $file
 
@@ -29,9 +29,9 @@ def substitute [
 
 # Substitute all instances of the $replace string with the $with string in <file>.
 def substituteInPlace [
-  file: path,
-  --replace (-r): string,
-  --with (-w): string
+  file: path, # The target file
+  --replace (-r): string, # The string to replace in $file
+  --with (-w): string # The replacement for $replace
 ] {
   substitute $file $file --replace $replace --with $with
 }
