@@ -18,25 +18,25 @@
         mkNushellDerivation =
           { pkgs              # Pinned Nixpkgs
           , name              # The name of the derivation
-          , system            # The build system
           , src ? ./.         # The derivation's sources
+          , system            # The build system
           , buildInputs ? [ ] # Same as buildInputs in stdenv
           , buildPhase ? ""   # Same as buildPhase in stdenv
           , installPhase ? "" # Same as installPhase in stdenv
           }:
 
           let
-            baseInputs = (with pkgs; [ nushell ]);
+            baseInputs = (with pkgs; [ nushell tree ]);
           in
           derivation {
-            inherit name system src buildPhase installPhase;
+            inherit name src system buildPhase installPhase;
             builder = "${pkgs.nushell}/bin/nu";
             args = [ ./builder.nu ];
 
             # Attributes passed to the environment (prefaced with __ to avoid naming collisions)
-            __nushell_version = pkgs.nushell.version;
-            __envFile = ./env.nu;
-            __buildInputs = buildInputs ++ baseInputs;
+            __nu_nushell_version = pkgs.nushell.version;
+            __nu_envFile = ./env.nu;
+            __nu_buildInputs = buildInputs ++ baseInputs;
           };
       };
 
