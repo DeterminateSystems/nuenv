@@ -2,9 +2,9 @@
 
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
 
-## Setup
+## Running the scenario
 
-Make sure that you have [Nix] installed. We recommend using the [Determinate Nix Installer][dni]:
+First, make sure that you have [Nix] installed. We recommend using the [Determinate Nix Installer][dni]:
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
@@ -19,7 +19,7 @@ nix build --print-build-logs
 
 You should see build output like this:
 
-```shell
+```log
 write-go-version> >>> INFO
 write-go-version> Running Nushell 0.71.0
 write-go-version> Derivation info:
@@ -46,10 +46,16 @@ This derivation does something very straightforward: it runs `go version` to out
 cat ./result/share/go-version.txt
 ```
 
+## How it works
+
+The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash]. The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment.
+
 [bash]: https://gnu.org/software/bash
 [derivation]: https://zero-to-nix.com/concepts/derivations
+[flake]: https://zero-to-nix.com/concepts/flakes
 [dni]: https://github.com/DeterminateSystems/nix-installer
 [go]: https://golang.org
 [nix]: https://nixos.org
 [nushell]: https://nushell.sh
 [realise]: https://zero-to-nix.com/concepts/realisation
+[stdenv]: TODO
