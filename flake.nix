@@ -40,9 +40,9 @@
           };
       };
 
-      devShells = forAllSystems ({ pkgs, ... }: {
+      devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ go nushell ];
+          packages = with pkgs; [ go_1_18 nushell ];
         };
       });
 
