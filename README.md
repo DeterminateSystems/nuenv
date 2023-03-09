@@ -19,25 +19,28 @@ nix build --print-build-logs
 
 You should see build output like this:
 
-```log
+```shell
 write-go-version> >>> INFO
-write-go-version> Running Nushell 0.71.0
+write-go-version> Running Nushell 0.76.0
 write-go-version> Derivation info:
 write-go-version> ╭─────────┬────────────────────────────────────────────────────────────────────╮
 write-go-version> │ name    │ write-go-version                                                   │
-write-go-version> │ src     │ /nix/store/ymkzvjd5k8w9f3xxx84s7grgcgjfww21-y7s2xi8c7zbkr5i69c1hbq │
-write-go-version> │         │ qzpgd3lbkj-source                                                  │
+write-go-version> │ src     │ /nix/store/l1k6rd7m4sidp1yan2l2lzhbiwq6g93p-lj6bwc6jr9yxq15m2m7ckx │
+write-go-version> │         │ sw7p22snww-source                                                  │
 write-go-version> │ system  │ aarch64-darwin                                                     │
-write-go-version> │ builder │ /nix/store/1rkir3hqk5lvcqd5lkiq628w0xrl17px-nushell-0.71.0/bin/nu  │
+write-go-version> │ builder │ /nix/store/5qc87alpnz5lynm3hk5sw5y23sg59ba2-nushell-0.76.0/bin/nu  │
 write-go-version> ╰─────────┴────────────────────────────────────────────────────────────────────╯
 write-go-version> >>> SETUP
 write-go-version> Creating output directory...
-write-go-version> Adding buildInputs to PATH...
+write-go-version> Adding 2 buildInputs to PATH...
+write-go-version> Copying sources...
 write-go-version> >>> REALISATION
 write-go-version> Running buildPhase...
+write-go-version> Writing version info to go-version.txt
+write-go-version> Writing help info to go-help.txt
 write-go-version> Running installPhase...
 write-go-version> >>> DONE!
-write-go-version> Output written to /nix/store/fv5261iww83vi8dm6q5qsgl3i6h3kf4q-write-go-version
+write-go-version> Output written to /nix/store/43znvcx0s50ihn0glvyf2djg6dpnqcjy-write-go-version
 ```
 
 This derivation does something very straightforward: it runs `go version` to output the version information for the [Go] package in the environment and writes that string to a text file under the `share` directory.
