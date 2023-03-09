@@ -1,4 +1,6 @@
-# Functions that can be used in derivation phases
+## Functions that can be used in derivation phases
+
+# Substitute all instances of the --replace string with the --with string in --file.
 def substituteInPlace [
   --replace (-r): string,
   --with (-w): string,
