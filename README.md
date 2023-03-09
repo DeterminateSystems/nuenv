@@ -56,6 +56,36 @@ There are a few things that you can do in the current standard environment that 
 
 * The phases are isolated from one another, which means that you can't do things like set an environment variable in the build phase and then retrieve its value in the install phase. That's because each phase is a separate Nushell script run using `nu --commands`.
 
+## Try it out
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "nixpkgs/release-22.11";
+    nix-nushell-env.url = "github:DeterminateSystems/nix-nushell-env";
+  };
+
+  outputs = { self, nixpkgs, nix-nushell-env }: let
+    system = "...";
+  in {
+    packages.${system}.default = nix-nushell-env.lib.mkNushellDerivation {
+      name = "hello";
+      pkgs = import nixpkgs { inherit system; };
+      src = ./.;
+      inherit system;
+      buildPhase = ''
+        "Hello" | save hello.txt
+      '';
+      installPhase = ''
+        let out = $"($env.out)/share"
+        mkdir $out
+        cp hello.txt $out
+      '';
+    };
+  };
+}
+```
+
 [bash]: https://gnu.org/software/bash
 [derivation]: https://zero-to-nix.com/concepts/derivations
 [flake]: https://zero-to-nix.com/concepts/flakes
