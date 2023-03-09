@@ -20,9 +20,9 @@
           , name              # The name of the derivation
           , system            # The build system
           , src ? ./.         # The derivation's sources
+          , buildInputs ? [ ] # Same as buildInputs in stdenv
           , buildPhase ? ""   # Same as buildPhase in stdenv
           , installPhase ? "" # Same as installPhase in stdenv
-          , buildInputs ? [ ] # Same as buildInputs in stdenv
           }:
 
           let
@@ -85,4 +85,3 @@
       });
     };
 }
-

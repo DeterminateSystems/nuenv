@@ -12,13 +12,13 @@ def runPhase [
   phase: string
 ] {
   if $phase != "" {
-    echo $"Running ($name)Phase..."
+    echo $"Running ($name)..."
 
     # We need to source the envFile prior to each phase so that custom Nushell commands get
     # registered. Right now there's a single env file but in principle there could be multiple.
     nu --commands $"source ($env.__envFile); ($phase)"
   } else {
-    echo $"Skipping ($name)Phase..."
+    echo $"Skipping ($name)..."
   }
 }
 
@@ -61,8 +61,8 @@ let-env PATH = ($inputs
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"
 
-runPhase "build" $env.buildPhase
-runPhase "install" $env.installPhase
+runPhase "buildPhase" $env.buildPhase
+runPhase "installPhase" $env.installPhase
 
 ## Run if realisation succeeds
 banner "DONE!"
