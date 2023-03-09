@@ -66,9 +66,19 @@
             installPhase = ''
               let share = $"($env.out)/share"
               mkdir $share
-              [go-help.txt go-version.txt] | each {|f| mv $f $share}
+              [go-help.txt go-version.txt] | each { |file| mv $file $share; }
             '';
           };
+
+        # Derivation that relies on the Nushell derivation
+        other = pkgs.stdenv.mkDerivation {
+          name = "other";
+          src = ./.;
+          installPhase = ''
+            mkdir -p $out/share
+            cp ${self.packages.${system}.default}/share/go-version.txt $out/share/version.txt
+          '';
+        };
       });
     };
 }

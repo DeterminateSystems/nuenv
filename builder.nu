@@ -6,7 +6,10 @@ def banner [text: string] {
 }
 
 # Run a derivation phase (skip if empty)
-def runPhase [name: string, phase: string] {
+def runPhase [
+  name: string,
+  phase: string
+] {
   if $phase != "" {
     echo $"Running ($name)Phase..."
 
@@ -42,8 +45,13 @@ echo "Creating output directory..."
 mkdir $env.out
 
 # Add buildInputs to the PATH
-echo "Adding buildInputs to PATH..."
-let-env PATH = ($env.__buildInputs | split row " " | each { |pkg| $"($pkg)/bin" } | str join ":")
+let inputs = ($env.__buildInputs | split row " ")
+let numInputs = ($inputs | length)
+
+echo $"Adding ($numInputs) buildInputs to PATH..."
+let-env PATH = ($inputs
+  | each { |pkg| $"($pkg)/bin" }
+  | str join ":")
 
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"
