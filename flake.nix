@@ -7,11 +7,17 @@
   outputs = { self, nixpkgs, flake-utils }:
     let
       forAllSystems = f: nixpkgs.lib.genAttrs flake-utils.lib.defaultSystems (system: f {
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.nuenv ]; };
         inherit system;
       });
     in
     {
+      overlays = {
+        nuenv = (final: prev: {
+          nuenv.mkDerivation = self.lib.mkNushellDerivation;
+        });
+      };
+
       lib = {
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
@@ -48,7 +54,7 @@
 
       packages = forAllSystems ({ pkgs, system }: {
         default =
-          self.lib.mkNushellDerivation {
+          pkgs.nuenv.mkDerivation {
             name = "write-go-version";
             inherit pkgs system;
             buildInputs = with pkgs; [ go ];
