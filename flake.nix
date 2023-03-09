@@ -47,21 +47,28 @@
       });
 
       packages = forAllSystems ({ pkgs, system }: {
-        default = self.lib.mkNushellDerivation {
-          name = "write-go-version";
-          inherit pkgs system;
-          src = ./.;
-          buildInputs = with pkgs; [ go_1_18 ];
-          buildPhase = ''
-            go version | save go-version.txt
-            substituteInPlace --file go-version.txt --replace "go" --with "golang"
-          '';
-          installPhase = ''
-            let share = $"($env.out)/share"
-            mkdir $share
-            mv go-version.txt $share
-          '';
-        };
+        default =
+          let
+            inText = "go";
+            outText = "golang";
+          in
+          self.lib.mkNushellDerivation {
+            name = "write-go-version";
+            inherit pkgs system;
+            src = ./.;
+            buildInputs = with pkgs; [ go_1_18 ];
+            buildPhase = ''
+              go version | save go-version.txt
+              go help | save help.txt
+              substitute help.txt go-help.txt --replace ${inText} --with ${outText}
+              substituteInPlace go-version.txt --replace ${inText} --with ${outText}
+            '';
+            installPhase = ''
+              let share = $"($env.out)/share"
+              mkdir $share
+              [go-help.txt go-version.txt] | each {|f| mv $f $share}
+            '';
+          };
       });
     };
 }

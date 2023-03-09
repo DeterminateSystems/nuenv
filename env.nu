@@ -1,24 +1,22 @@
 ## Functions that can be used in derivation phases
 
-# Substitute all instances of the --replace string with the --with string in --file.
-def substituteInPlace [
+# Substitute all instances of the --replace string with the --with string in $1
+# and output to $2.
+def substitute [
+  file: path,
+  out: path,
   --replace (-r): string,
-  --with (-w): string,
-  --file (-f): string,
+  --with (-w): string
 ] {
-  if $replace == null {
-    error make {msg: "You must specify text to replace"}
-  }
+  (open $file | str replace -a $replace $with) | save $out
+}
 
-  if $with == null {
-    error make {msg: "You must specify replacement text"}
-  }
-
-  if $file == null {
-    error make {msg: "You must specifiy a file"}
-  }
-
-  echo $'Substituting "($with)" for "($replace)" in ($file)'
-
-  (cat $file | str replace -a $replace $with) | save $file
+# Substitute, in place, all instances of the --replace string with the --with
+# string in $1.
+def substituteInPlace [
+  file: path,
+  --replace (-r): string,
+  --with (-w): string
+] {
+  substitute $file $file --replace $replace --with $with
 }
