@@ -55,27 +55,27 @@
       packages = forAllSystems ({ pkgs, system }: {
         default =
           pkgs.nuenv.mkDerivation {
-            name = "write-go-version";
+            name = "just-experimenting";
             inherit pkgs system;
-            buildInputs = with pkgs; [ go ];
+            buildInputs = with pkgs; [ curl ];
             buildPhase = ''
-              let versionFile = "go-version.txt"
+              let versionFile = "curl-version.txt"
               echo $"Writing version info to ($versionFile)"
-              go version | save $versionFile
+              curl --version | save $versionFile
 
-              let helpFile = "go-help.txt"
+              let helpFile = "curl-help.txt"
               echo $"Writing help info to ($helpFile)"
-              go help | save $helpFile
+              curl --help | save $helpFile
+
 
               [$versionFile $helpFile] | each {|f|
-                substituteInPlace $f --replace go --with golang
-                substituteInPlace $f --replace Go --with GOLANG
+                substituteInPlace $f --replace curl --with CURL
               }
             '';
             installPhase = ''
               let share = $"($env.out)/share"
               mkdir $share
-              [go-help.txt go-version.txt] | each { |file| mv $file $share }
+              [curl-help.txt curl-version.txt] | each { |file| mv $file $share }
             '';
           };
 

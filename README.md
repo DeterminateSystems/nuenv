@@ -1,5 +1,8 @@
 # nuenv, a Nushell environment for Nix
 
+> **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for
+> others&mdash;but not something you should use for any serious purpose.
+
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
 
 ## Running the scenario
@@ -58,8 +61,12 @@ The key differentiator from regular Nix here is that realisation happens in [Nus
 There are a few things that you can do in the current standard environment that you can't do in this Nushell environment:
 
 * The phases are isolated from one another, which means that you can't do things like set an environment variable in the build phase and then retrieve its value in the install phase. That's because each phase is a separate Nushell script run using `nu --commands`.
+* There are only two phases: `buildPhase` and `installPhase`.
 
 ## Try it out
+
+You can use nuenv to build derivations
+
 
 ```nix
 {
