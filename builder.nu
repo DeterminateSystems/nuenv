@@ -56,11 +56,9 @@ mkdir $env.out
 # Add buildInputs to the PATH
 echo $"Adding ($numInputs) buildInputs to PATH..."
 let-env PATH = ($inputs |
-  each { |pkg| $"($pkg)/bin" } |
+  par-each { $"($in)/bin" } |
   str collect (char esep)
 )
-
-echo $env.PATH
 
 # Copy sources
 echo "Copying sources..."
