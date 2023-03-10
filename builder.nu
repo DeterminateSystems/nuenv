@@ -67,8 +67,7 @@ cp -r $"($env.src)/**/*" $here
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"
 
-runPhase "buildPhase" $env.buildPhase
-runPhase "installPhase" $env.installPhase
+runPhase "buildPhase" $env.build
 
 ## Run if realisation succeeds
 banner "DONE!"

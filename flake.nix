@@ -30,12 +30,11 @@
           , src ? ./.         # The derivation's sources
           , system            # The build system
           , buildInputs ? [ ] # Same as buildInputs in stdenv
-          , buildPhase ? ""   # Same as buildPhase in stdenv
-          , installPhase ? "" # Same as installPhase in stdenv
+          , build ? ""        # Same as buildPhase in stdenv
           }:
 
           derivation {
-            inherit name src system buildPhase installPhase;
+            inherit name src system build;
             builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
 
@@ -54,28 +53,30 @@
 
       packages = forAllSystems ({ pkgs, system }: {
         default =
+          let
+            curl = "${pkgs.curl}/bin/curl";
+          in
           pkgs.nuenv.mkDerivation {
             name = "just-experimenting";
             inherit system;
-	    nushell = pkgs.nushell;
-            buildInputs = with pkgs; [ curl ];
-            buildPhase = ''
+            nushell = pkgs.nushell;
+            #buildInputs = with pkgs; [ curl ];
+            build = ''
+              let share = $"($env.out)/share"
+              mkdir $share
+
               let versionFile = "curl-version.txt"
               echo $"Writing version info to ($versionFile)"
-              curl --version | save $versionFile
+              ${curl} --version | save $versionFile
 
               let helpFile = "curl-help.txt"
               echo $"Writing help info to ($helpFile)"
-              curl --help | save $helpFile
-
+              ${curl} --help | save $helpFile
 
               [$versionFile $helpFile] | each {|f|
                 substituteInPlace $f --replace curl --with CURL
               }
-            '';
-            installPhase = ''
-              let share = $"($env.out)/share"
-              mkdir $share
+
               [curl-help.txt curl-version.txt] | each { |file| mv $file $share }
             '';
           };
