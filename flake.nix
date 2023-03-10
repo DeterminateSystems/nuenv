@@ -1,12 +1,15 @@
 {
-  inputs = {
-    nixpkgs.url = "nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
+  description = "nuenv: a Nushell environment for Nix";
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs }:
     let
-      forAllSystems = f: nixpkgs.lib.genAttrs flake-utils.lib.defaultSystems (system: f {
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.nuenv ]; };
         inherit system;
       });
@@ -22,7 +25,7 @@
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
         mkNushellDerivation =
-          { pkgs              # Pinned Nixpkgs
+          { nushell           # Nushell package
           , name              # The name of the derivation
           , src ? ./.         # The derivation's sources
           , system            # The build system
@@ -31,18 +34,15 @@
           , installPhase ? "" # Same as installPhase in stdenv
           }:
 
-          let
-            baseInputs = (with pkgs; [ nushell ]);
-          in
           derivation {
             inherit name src system buildPhase installPhase;
-            builder = "${pkgs.nushell}/bin/nu";
+            builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
 
             # Attributes passed to the environment (prefaced with __ to avoid naming collisions)
-            __nu_nushell_version = pkgs.nushell.version;
+            __nu_nushell_version = nushell.version;
             __nu_envFile = ./env.nu;
-            __nu_buildInputs = buildInputs ++ baseInputs;
+            __nu_buildInputs = buildInputs ++ [ nushell ];
           };
       };
 
@@ -56,7 +56,8 @@
         default =
           pkgs.nuenv.mkDerivation {
             name = "just-experimenting";
-            inherit pkgs system;
+            inherit system;
+	    nushell = pkgs.nushell;
             buildInputs = with pkgs; [ curl ];
             buildPhase = ''
               let versionFile = "curl-version.txt"

@@ -10,7 +10,6 @@ def banner [text: string] {
   echo $"(ansi red)>>>(ansi reset) (ansi green)($text)(ansi reset)"
 }
 
-
 # Run a derivation phase (skip if empty)
 def runPhase [
   name: string,
@@ -56,9 +55,12 @@ mkdir $env.out
 
 # Add buildInputs to the PATH
 echo $"Adding ($numInputs) buildInputs to PATH..."
-let-env PATH = ($inputs
-  | each { |pkg| $"($pkg)/bin" }
-  | str join ":")
+let-env PATH = ($inputs |
+  each { |pkg| $"($pkg)/bin" } |
+  str collect (char esep)
+)
+
+echo $env.PATH
 
 # Copy sources
 echo "Copying sources..."

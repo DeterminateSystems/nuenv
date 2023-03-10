@@ -19,7 +19,7 @@ def substitute [
   file: path, # The target file
   out: path, # The output file
   --replace (-r): string, # The string to replace in <file>
-  --with (-w): string # The replacement for <replace>
+  --with (-w): string, # The replacement for <replace>
 ] {
   ensureFileExists $file
 
