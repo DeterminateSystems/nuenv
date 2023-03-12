@@ -1,6 +1,6 @@
 ## Values
 let here = $env.PWD # Current working directory
-let inputs = ($env.__nu_buildInputs | split row " ")
+let inputs = ($env.__nu_packages | split row " ")
 let numInputs = ($inputs | length)
 
 ## Helper functions
@@ -53,11 +53,12 @@ banner "SETUP"
 echo "Creating output directory..."
 mkdir $env.out
 
-# Add buildInputs to the PATH
-echo $"Adding ($numInputs) buildInputs to PATH..."
-let-env PATH = ($inputs |
-  par-each { $"($in)/bin" } |
-  str collect (char esep)
+# Add packages to PATH
+echo $"Adding ($numInputs) packages to PATH..."
+let-env PATH = (
+  $inputs
+  | each { $"($in)/bin" }
+  | str collect (char esep)
 )
 
 # Copy sources

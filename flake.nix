@@ -25,12 +25,12 @@
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
         mkNushellDerivation =
-          { nushell           # Nushell package
-          , name              # The name of the derivation
-          , src ? ./.         # The derivation's sources
-          , system            # The build system
-          , buildInputs ? [ ] # Same as buildInputs in stdenv
-          , build ? ""        # Same as buildPhase in stdenv
+          { nushell        # Nushell package
+          , name           # The name of the derivation
+          , src ? ./.      # The derivation's sources
+          , system         # The build system
+          , packages ? [ ] # Packages provided to the realisation process
+          , build ? ""     # The Nushell script used for realisation
           }:
 
           derivation {
@@ -41,7 +41,7 @@
             # Attributes passed to the environment (prefaced with __ to avoid naming collisions)
             __nu_nushell_version = nushell.version;
             __nu_envFile = ./env.nu;
-            __nu_buildInputs = buildInputs ++ [ nushell ];
+            __nu_packages = packages ++ [ nushell ];
           };
       };
 
@@ -60,7 +60,7 @@
             name = "just-experimenting";
             inherit system;
             nushell = pkgs.nushell;
-            #buildInputs = with pkgs; [ curl ];
+            packages = with pkgs; [ ];
             build = ''
               let share = $"($env.out)/share"
               mkdir $share
