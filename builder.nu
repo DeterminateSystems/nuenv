@@ -1,7 +1,7 @@
 ## Values
 let here = $env.PWD # Current working directory
-let inputs = ($env.__nu_packages | split row " ")
-let numInputs = ($inputs | length)
+let packages = ($env.__nu_packages | split row " ")
+let numPackages = ($packages | length)
 
 ## Helper functions
 
@@ -16,7 +16,7 @@ def runPhase [
   phase: string,
 ] {
   if $phase != "" {
-    echo $"Running ($name)..."
+    echo $"Running phase (ansi blue)($name)(ansi reset)..."
 
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
@@ -54,11 +54,11 @@ echo "Creating output directory..."
 mkdir $env.out
 
 # Add packages to PATH
-echo $"Adding ($numInputs) packages to PATH..."
+echo $"Adding ($numPackages) packages to PATH..."
 let-env PATH = (
-  $inputs
-  | each { $"($in)/bin" }
-  | str collect (char esep)
+  $packages
+  | each { $"($in)/bin" }   # Append /bin to each package path
+  | str collect (char esep) # Collect into a single colon-separate string
 )
 
 # Copy sources
@@ -68,7 +68,7 @@ cp -r $"($env.src)/**/*" $here
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"
 
-runPhase "buildPhase" $env.build
+runPhase "build" $env.build
 
 ## Run if realisation succeeds
 banner "DONE!"
