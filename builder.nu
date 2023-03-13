@@ -13,11 +13,8 @@ let packages = ($env.__nu_packages | split row " ")
 let nushellVersion = $env.__nu_nushell_version
 let envFile = $env.__nu_envFile
 
-# Derivative values
+# Helper values
 let numPackages = ($packages | length)
-
-# Unset Nushell-specific environment variables (just to be sure)
-["__nu_envFile" "__nu_packages" "__nu_nushell_version"] | each { hide-env $in }
 
 ### Helper functions
 
