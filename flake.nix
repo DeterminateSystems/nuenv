@@ -34,7 +34,7 @@
           }:
 
           derivation {
-            inherit name src system build;
+            inherit name src system;
             builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
 
@@ -42,6 +42,14 @@
             __nu_nushell_version = nushell.version;
             __nu_envFile = ./env.nu;
             __nu_packages = packages ++ [ nushell ];
+
+            build =
+              if builtins.isString build then
+                build
+              else if builtins.isPath build then
+                (builtins.readFile build)
+              else throw "build attribute must be either a string or a path"
+            ;
           };
       };
 
