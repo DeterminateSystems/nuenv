@@ -1,0 +1,22 @@
+name: Realise a derivation using Nuenv
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Build the Docker image using Nix
+  build:
+    runs-on: ubuntu-22.04
+    environment: build
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Build basic Nuenv derivation
+        run: nix build
