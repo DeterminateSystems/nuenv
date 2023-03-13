@@ -49,6 +49,13 @@
         default = pkgs.mkShell {
           packages = with pkgs; [ go nushell ];
         };
+
+        nuenv = pkgs.mkShell {
+          packages = with pkgs; [ nushell ];
+          shellHook = ''
+            nu --config ./env.nu
+          '';
+        };
       });
 
       packages = forAllSystems ({ pkgs, system }: {
@@ -63,8 +70,6 @@
             packages = with pkgs; [ go ];
             src = ./.;
             build = ''
-              ensureFileExists foo.txt
-
               let share = $"($env.out)/share"
               mkdir $share
 

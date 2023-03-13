@@ -1,9 +1,25 @@
-## Values
-let here = $env.PWD # Current working directory
+## Parse the build environment
+
+# General Nix values
+let sandbox = $env.NIX_BUILD_TOP # Sandbox directory
+let drvName = $env.name
+let drvSrc = $env.src
+let drvOut = $env.out
+let drvSystem = $env.system
+let drvBuildScript = $env.build
+
+# Nushell-specific values
 let packages = ($env.__nu_packages | split row " ")
+let nushellVersion = $env.__nu_nushell_version
+let envFile = $env.__nu_envFile
+
+# Derivative values
 let numPackages = ($packages | length)
 
-## Helper functions
+# Unset Nushell-specific environment variables (just to be sure)
+["__nu_envFile" "__nu_packages" "__nu_nushell_version"] | each { hide-env $in }
+
+### Helper functions
 
 # Splashy, colored banner text
 def banner [text: string] {
@@ -21,7 +37,7 @@ def runPhase [
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
     #$ principle there could be multiple.
-    nu --commands $"source ($env.__nu_envFile); ($phase)"
+    nu --commands $"source ($envFile); ($phase)"
   } else {
     echo $"Skipping ($name)..."
   }
@@ -30,31 +46,28 @@ def runPhase [
 ## Provide info about the current derivation
 banner "INFO"
 
-
 # Display Nushell version
-echo $"(ansi blue)Running Nushell ($env.__nu_nushell_version)(ansi reset)"
+echo $"(ansi blue)Running Nushell ($nushellVersion)(ansi reset)"
 
 # Display info about the derivation
 echo "Derivation info:"
 
 {
-  name: $env.name,
-  src: $env.src,
-  out: $env.out,
-  system: $env.system,
-  builder: $env.builder,
-  workingDirectory: $here
+  name: $drvName,
+  src: $drvSrc,
+  out: $drvOut,
+  system: $drvSystem
 } | table
 
 ## Set up the environment
 banner "SETUP"
 
 # Create the output directory (realisation fails otherwise)
-echo "Creating output directory..."
-mkdir $env.out
+echo $"Creating output directory at ($drvOut)"
+mkdir $drvOut
 
 # Add packages to PATH
-echo $"Adding ($numPackages) packages to PATH..."
+echo $"Adding (ansi teal)($numPackages)(ansi reset) packages to PATH..."
 let-env PATH = (
   $packages
   | each { $"($in)/bin" }   # Append /bin to each package path
@@ -63,14 +76,16 @@ let-env PATH = (
 
 # Copy sources
 echo "Copying sources..."
-cp -r $"($env.src)/**/*" $here
+
+let srcs = glob $"($drvSrc)/**/*"
+$srcs | each { |src| cp -r $src $sandbox }
 
 ## The realisation process (only two phases for now, but there could be more)
 banner "REALISATION"
 
-runPhase "build" $env.build
+runPhase "build" $drvBuildScript
 
 ## Run if realisation succeeds
 banner "DONE!"
 
-echo $"Output written to ($env.out)"
+echo $"Output written to ($drvOut)"
