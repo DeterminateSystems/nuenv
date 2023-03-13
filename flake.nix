@@ -82,7 +82,7 @@
               go help | save $helpFile
 
               [$versionFile $helpFile] | each {|f|
-                substituteInPlace $f --replace "go" --with "GO"
+                substituteInPlace $f --replace "go" --with "golang"
               }
             '';
           };
@@ -93,6 +93,7 @@
           src = ./.;
           installPhase = ''
             mkdir -p $out/share
+
             cp ${self.packages.${system}.default}/share/go-version.txt $out/share/version.txt
           '';
         };

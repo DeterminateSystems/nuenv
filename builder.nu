@@ -7,6 +7,7 @@ let drvSrc = $env.src
 let drvOut = $env.out
 let drvSystem = $env.system
 let drvBuildScript = $env.build
+let nixStore = $env.NIX_STORE
 
 # Nushell-specific values
 let packages = ($env.__nu_packages | split row " ")
@@ -15,6 +16,12 @@ let envFile = $env.__nu_envFile
 
 # Helper values
 let numPackages = ($packages | length)
+
+let packagePath = (
+  $packages
+  | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
+  | str collect (char esep)      # Collect into a single colon-separate string
+)
 
 ### Helper functions
 
@@ -29,7 +36,7 @@ def runPhase [
   phase: string,
 ] {
   if $phase != "" {
-    echo $"Running phase (ansi blue)($name)(ansi reset)..."
+    echo $"Running (ansi blue)($name)(ansi reset) phase..."
 
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
@@ -60,16 +67,11 @@ echo "Derivation info:"
 banner "SETUP"
 
 # Create the output directory (realisation fails otherwise)
-echo $"Creating output directory at ($drvOut)"
 mkdir $drvOut
 
 # Add packages to PATH
-echo $"Adding (ansi teal)($numPackages)(ansi reset) packages to PATH..."
-let-env PATH = (
-  $packages
-  | each { $"($in)/bin" }   # Append /bin to each package path
-  | str collect (char esep) # Collect into a single colon-separate string
-)
+echo $"Adding (ansi teal)($numPackages)(ansi reset) packages to PATH"
+let-env PATH = $packagePath
 
 # Copy sources
 echo "Copying sources..."

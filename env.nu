@@ -16,11 +16,12 @@ def err [
 
 # Check that <file> exists and throw an error if not
 def ensureFileExists [
-  file: path, # The path to check for existence
+  file: path # The path to check for existence
 ] {
   if not ($file | path exists) {
     let relativeFilePath = get-file-relative-path $file
     err $"File not found at: (ansi red)($relativeFilePath)(ansi reset)"
+    exit 1
   }
 }
 
