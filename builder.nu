@@ -15,20 +15,31 @@ let nushellVersion = $env.__nu_nushell_version
 let envFile = $env.__nu_envFile
 
 # Helper values
-let numPackages = ($packages | length)
+let numPackages = ($packages | length) # Total # of packages added to the env
 
-let packagePath = (
+let packagesPath = (
   $packages
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
   | str collect (char esep)      # Collect into a single colon-separate string
 )
 
+let srcs = glob $"($drvSrc)/**/*" # Sources to copy into sandbox
+
 ### Helper functions
 
+## Logging
+
+def color [color: string, msg: string] { echo $"(ansi $color)($msg)(ansi reset)" }
+def blue [msg: string] { color "blue" $msg }
+def green [msg: string] { color "green" $msg }
+def purple [msg: string] { color "purple" $msg }
+def red [msg: string] { color "red" $msg }
+def teal [msg: string] { color "teal" $msg }
+
 # Splashy, colored banner text
-def banner [text: string] {
-  echo $"(ansi red)>>>(ansi reset) (ansi green)($text)(ansi reset)"
-}
+def banner [text: string] { echo $"(red ">>>") (green $text)" }
+
+## Derivation stuff
 
 # Run a derivation phase (skip if empty)
 def runPhase [
@@ -36,12 +47,12 @@ def runPhase [
   phase: string,
 ] {
   if $phase != "" {
-    echo $"Running (ansi blue)($name)(ansi reset) phase..."
+    echo $"(blue ">>") Running (purple $name) phase..."
 
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
     #$ principle there could be multiple.
-    nu --commands $"source ($envFile); ($phase)"
+    nu --config $envFile --commands $phase
   } else {
     echo $"Skipping ($name)..."
   }
@@ -51,7 +62,7 @@ def runPhase [
 banner "INFO"
 
 # Display Nushell version
-echo $"(ansi blue)Running Nushell ($nushellVersion)(ansi reset)"
+echo $"Running Nushell (blue $nushellVersion)"
 
 # Display info about the derivation
 echo "Derivation info:"
@@ -70,13 +81,12 @@ banner "SETUP"
 mkdir $drvOut
 
 # Add packages to PATH
-echo $"Adding (ansi teal)($numPackages)(ansi reset) packages to PATH"
-let-env PATH = $packagePath
+echo $"Adding (teal $numPackages) packages to PATH"
+let-env PATH = $packagesPath
 
 # Copy sources
 echo "Copying sources..."
 
-let srcs = glob $"($drvSrc)/**/*"
 $srcs | each { |src| cp -r $src $sandbox }
 
 ## The realisation process (only two phases for now, but there could be more)

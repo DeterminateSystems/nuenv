@@ -11,7 +11,7 @@ def get-file-relative-path [
 def err [
   msg: string # The error string to log
 ] {
-  echo $"(ansi red)ERROR(ansi reset): ($msg)"
+  echo $"(red "ERROR"): ($msg)"
 }
 
 # Check that <file> exists and throw an error if not
@@ -50,26 +50,4 @@ def substituteInPlace [
   --with (-w): string # The replacement for <replace>
 ] {
   substitute $file $file --replace $replace --with $with
-}
-
-# Splashy, colored banner text
-def banner [text: string] {
-  echo $"(ansi red)>>>(ansi reset) (ansi green)($text)(ansi reset)"
-}
-
-# Run a derivation phase (skip if empty)
-def runPhase [
-  name: string,
-  phase: string,
-] {
-  if $phase != "" {
-    echo $"Running phase (ansi blue)($name)(ansi reset)..."
-
-    # We need to source the envFile prior to each phase so that custom Nushell
-    # commands are registered. Right now there's a single env file but in
-    #$ principle there could be multiple.
-    nu --commands $"source ($env.__nu_envFile); ($phase)"
-  } else {
-    echo $"Skipping ($name)..."
-  }
 }
