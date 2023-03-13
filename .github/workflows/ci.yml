@@ -19,9 +19,9 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@main
 
       - name: Build Nuenv derivation
-        run: nix build
+        run: nix build --print-build-logs
 
       - name: Build stdenv derivation that depends on Nuenv derivation
         run: |
-          nix build .#other
+          nix build --print-build-logs .#other
           cat result/share/version.txt
