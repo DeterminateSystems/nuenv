@@ -58,7 +58,7 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ go nushell ];
+          packages = with pkgs; [ nushell ];
         };
 
         nuenv = pkgs.mkShell {
@@ -72,33 +72,28 @@
       packages = forAllSystems ({ pkgs, system }: rec {
         default = nushell;
 
-        nushell =
-          let
-            curl = "${pkgs.curl}/bin/curl";
-          in
-          pkgs.nuenv.mkDerivation {
-            name = "just-experimenting";
-            inherit system;
-            nushell = pkgs.nushell;
-            packages = with pkgs; [ go ];
-            src = ./.;
-            build = ./example.nu;
-            debug = true;
-          };
+        # An example Nushell-based derivation
+        nushell = pkgs.nuenv.mkDerivation {
+          name = "just-experimenting";
+          inherit system;
+          nushell = pkgs.nushell;
+          packages = with pkgs; [ go ];
+          src = ./.;
+          build = ./example.nu;
+          debug = true;
+        };
 
-        nushellNoDebug =
-          let
-            curl = "${pkgs.curl}/bin/curl";
-          in
-          pkgs.nuenv.mkDerivation {
-            name = "just-experimenting";
-            inherit system;
-            nushell = pkgs.nushell;
-            packages = with pkgs; [ go ];
-            src = ./.;
-            build = ./example.nu;
-          };
+        # The Nushell-based derivation above but with debug mode disabled
+        nushellNoDebug = pkgs.nuenv.mkDerivation {
+          name = "just-experimenting";
+          inherit system;
+          nushell = pkgs.nushell;
+          packages = with pkgs; [ go ];
+          src = ./.;
+          build = ./example.nu;
+        };
 
+        # The same derivation above but using the stdenv
         std = pkgs.stdenv.mkDerivation {
           name = "just-experimenting";
           inherit system;
