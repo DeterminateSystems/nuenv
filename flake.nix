@@ -69,8 +69,10 @@
         };
       });
 
-      packages = forAllSystems ({ pkgs, system }: {
-        default =
+      packages = forAllSystems ({ pkgs, system }: rec {
+        default = nushell;
+
+        nushell =
           let
             curl = "${pkgs.curl}/bin/curl";
           in
@@ -83,6 +85,42 @@
             build = ./example.nu;
             debug = true;
           };
+
+        nushellNoDebug =
+          let
+            curl = "${pkgs.curl}/bin/curl";
+          in
+          pkgs.nuenv.mkDerivation {
+            name = "just-experimenting";
+            inherit system;
+            nushell = pkgs.nushell;
+            packages = with pkgs; [ go ];
+            src = ./.;
+            build = ./example.nu;
+          };
+
+        std = pkgs.stdenv.mkDerivation {
+          name = "just-experimenting";
+          inherit system;
+          buildInputs = with pkgs; [ go ];
+          src = ./.;
+          buildPhase = ''
+            versionFile="go-version.txt"
+            echo "Writing version info to ''${versionFile}"
+            go version > $versionFile
+            substituteInPlace $versionFile --replace "go" "golang"
+
+            helpFile="go-help.txt"
+            echo "Writing help info to ''${helpFile}"
+            go help > $helpFile
+            substituteInPlace $helpFile --replace "go" "golang"
+          '';
+          installPhase = ''
+            mkdir -p $out/share
+            mv foo.txt $out/share
+            cp go-*.txt $out/share
+          '';
+        };
 
         # Derivation that relies on the Nushell derivation
         other = pkgs.stdenv.mkDerivation {
