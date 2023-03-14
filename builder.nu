@@ -14,6 +14,8 @@ let packages = ($env.__nu_packages | split row " ")
 let nushellVersion = $env.__nu_nushell_version
 let envFile = $env.__nu_envFile
 
+let debug = ($env.__nu_debug == "1")
+
 # Helper values
 let numPackages = ($packages | length) # Total # of packages added to the env
 
@@ -38,6 +40,7 @@ def teal [msg: string] { color "teal" $msg }
 
 # Splashy, colored banner text
 def banner [text: string] { echo $"(red ">>>") (green $text)" }
+def info [msg: string] { echo $"(blue ">") ($msg)" }
 
 ## Derivation stuff
 
@@ -47,54 +50,58 @@ def runPhase [
   phase: string,
 ] {
   if $phase != "" {
-    echo $"(blue ">>") Running (purple $name) phase"
+    if $debug { info $"Running (purple $name) phase" }
 
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
     #$ principle there could be multiple.
     nu --config $envFile --commands $phase
   } else {
-    echo $"Skipping (purple $name) phase"
+    if $debug { info $"Skipping (purple $name) phase" }
   }
 }
 
 ## Provide info about the current derivation
-banner "INFO"
+if $debug {
+  banner "INFO"
 
-# Display Nushell version
-echo $"Running Nushell (blue $nushellVersion)"
+  # Display Nushell version
+  info $"Running Nushell (blue $nushellVersion)"
 
-# Display info about the derivation
-echo "Derivation info:"
+  info "Derivation info:"
 
-{
-  name: $drvName,
-  src: $drvSrc,
-  out: $drvOut,
-  system: $drvSystem
-} | table
+  {
+    name: $drvName,
+    src: $drvSrc,
+    out: $drvOut,
+    system: $drvSystem
+  } | table
+}
 
 ## Set up the environment
-banner "SETUP"
+if $debug { banner "SETUP" }
 
 # Create the output directory (realisation fails otherwise)
 mkdir $drvOut
 
 # Add packages to PATH
-echo $"Adding (teal $numPackages) packages to PATH"
+if $debug { info $"Adding (teal $numPackages) packages to PATH" }
+
 let-env PATH = $packagesPath
 
 # Copy sources
-echo "Copying sources"
+if $debug { info "Copying sources" }
 
 $srcs | each { |src| cp -r $src $sandbox }
 
 ## The realisation process (only two phases for now, but there could be more)
-banner "REALISATION"
+if $debug { banner "REALISATION" }
 
 runPhase "build" $drvBuildScript
 
 ## Run if realisation succeeds
-banner "DONE!"
+if $debug {
+  banner "DONE!"
 
-echo $"Output written to ($drvOut)"
+  info $"Output written to ($drvOut)"
+}

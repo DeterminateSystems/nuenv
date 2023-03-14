@@ -112,7 +112,6 @@
           '';
           installPhase = ''
             mkdir -p $out/share
-            mv foo.txt $out/share
             cp go-*.txt $out/share
           '';
         };
