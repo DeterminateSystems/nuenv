@@ -31,6 +31,7 @@
           , system         # The build system
           , packages ? [ ] # Packages provided to the realisation process
           , build ? ""     # The Nushell script used for realisation
+          , debug ? false  # Run in debug mode
           }:
 
           derivation {
@@ -42,7 +43,9 @@
             __nu_nushell_version = nushell.version;
             __nu_envFile = ./env.nu;
             __nu_packages = packages ++ [ nushell ];
+            __nu_debug = debug;
 
+            # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
             build =
               if builtins.isString build then
                 build
@@ -78,6 +81,7 @@
             packages = with pkgs; [ go ];
             src = ./.;
             build = ./example.nu;
+            debug = true;
           };
 
         # Derivation that relies on the Nushell derivation
