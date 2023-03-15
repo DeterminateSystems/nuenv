@@ -54,17 +54,9 @@ cat ./result/share/go-version.txt
 
 The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash]. The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment.
 
-## Current limitations
-
-There are a few things that you can do in the current standard environment that you can't do in this Nushell environment:
-
-* The phases are isolated from one another, which means that you can't do things like set an environment variable in the build phase and then retrieve its value in the install phase. That's because each phase is a separate Nushell script run using `nu --commands`.
-* There are only two phases: `buildPhase` and `installPhase`.
-
 ## Try it out
 
-You can use nuenv to build derivations
-
+You can use nuenv to realise your own derivations. Here's a straightforward example:
 
 ```nix
 {
