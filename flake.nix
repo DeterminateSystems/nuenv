@@ -43,6 +43,9 @@
             builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
 
+            # When this is set, Nix writes the environment to a JSON file at
+            # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
+            # is cleaner than parsing a bunch of environment variables as strings.
             __structuredAttrs = true;
 
             # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
