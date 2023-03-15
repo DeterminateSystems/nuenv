@@ -12,3 +12,9 @@ go help | save $helpFile
 [$versionFile $helpFile] | each {|f|
   substituteInPlace $f --replace "go" --with "golang"
 }
+
+let docOut = $"($env.doc)/share"
+mkdir $docOut
+
+echo $"Writing docs to ($docOut)"
+"Here is the documentation" | save $"($docOut)/docs.txt"

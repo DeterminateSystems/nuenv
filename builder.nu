@@ -7,13 +7,10 @@ let attrs = open $attrsJsonFile
 let sandbox = $env.NIX_BUILD_TOP # Sandbox directory
 let drvName = $attrs.name
 let drvSrc = $attrs.src
-let drvOut = $attrs.outputs.out
 let drvSystem = $attrs.system
 let drvBuildScript = $attrs.build
 let nixStore = $env.NIX_STORE
-
-# Helpers for build scripts
-let-env out = $attrs.outputs.out
+let outputs = ($attrs.outputs | transpose)
 
 # Nushell-specific values
 let packages = (
@@ -80,7 +77,7 @@ if $debug {
   {
     name: $drvName,
     src: $drvSrc,
-    out: $drvOut,
+    #out: $drvOut,
     system: $drvSystem
   } | table
 }
@@ -89,7 +86,7 @@ if $debug {
 if $debug { banner "SETUP" }
 
 # Create the output directory (realisation fails otherwise)
-mkdir $drvOut
+#mkdir $drvOut
 
 # Add packages to PATH
 if $debug { info $"Adding (blue $numPackages) packages to PATH" }
@@ -101,8 +98,16 @@ if $debug { info "Copying sources" }
 
 $srcs | each { |src| cp -r $src $sandbox }
 
-## The realisation process (only two phases for now, but there could be more)
+# The realisation process
 if $debug { banner "REALISATION" }
+
+# Create output directories and set environment variables for all outputs
+for output in ($outputs) {
+  let name = ($output | get column0)
+  let value = ($output | get column1)
+  let-env $name = $value
+  mkdir $value
+}
 
 runPhase "build" $drvBuildScript
 
@@ -110,5 +115,9 @@ runPhase "build" $drvBuildScript
 if $debug {
   banner "DONE!"
 
-  info $"Output written to ($drvOut)"
+  for output in ($outputs) {
+    let name = ($output | get column0)
+    let value = ($output | get column1)
+    info $"($name) output written to ($value)"
+  }
 }

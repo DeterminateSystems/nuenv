@@ -29,17 +29,18 @@
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
         mkNushellDerivation =
-          { nushell        # Nushell package
-          , name           # The name of the derivation
-          , src            # The derivation's sources
-          , system         # The build system
-          , packages ? [ ] # Packages provided to the realisation process
-          , build ? ""     # The Nushell script used for realisation
-          , debug ? false  # Run in debug mode
+          { nushell             # Nushell package
+          , name                # The name of the derivation
+          , src                 # The derivation's sources
+          , system              # The build system
+          , packages ? [ ]      # Packages provided to the realisation process
+          , build ? ""          # The Nushell script used for realisation
+          , debug ? false       # Run in debug mode
+          , outputs ? [ "out" ] # Outputs to provide
           }:
 
           derivation {
-            inherit name src system;
+            inherit name outputs src system;
             builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
 
@@ -94,6 +95,7 @@
           inherit system;
           nushell = pkgs.nushell;
           packages = with pkgs; [ go ];
+          outputs = [ "out" "doc" ];
           src = ./.;
           build = ./example.nu;
           debug = true;
@@ -115,6 +117,7 @@
           inherit system;
           buildInputs = with pkgs; [ go ];
           src = ./.;
+          outputs = [ "out" "doc" ];
           buildPhase = ''
             versionFile="go-version.txt"
             echo "Writing version info to ''${versionFile}"
@@ -125,10 +128,15 @@
             echo "Writing help info to ''${helpFile}"
             go help > $helpFile
             substituteInPlace $helpFile --replace "go" "golang"
+
+            echo "Docs!" > docs.txt
           '';
           installPhase = ''
             mkdir -p $out/share
             cp go-*.txt $out/share
+
+            mkdir -p $doc/share
+            cp docs.txt $doc/share
           '';
         };
 
