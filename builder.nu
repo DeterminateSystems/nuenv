@@ -1,7 +1,5 @@
 ## Parse the build environment
 
-env | select name value
-
 # General Nix values
 let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
 let attrs = open $attrsJsonFile
@@ -40,13 +38,13 @@ let srcs = glob $"($drvSrc)/**/*" # Sources to copy into sandbox
 ## Helper commands
 
 # Logging
-def color [color: string, msg: string] { echo $"(ansi $color)($msg)(ansi reset)" }
+def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
 def blue [msg: string] { color "blue" $msg }
 def green [msg: string] { color "green" $msg }
 def red [msg: string] { color "red" $msg }
 
-def banner [text: string] { echo $"(red ">>>") (green $text)" }
-def info [msg: string] { echo $"(blue ">") ($msg)" }
+def banner [text: string] { $"(red ">>>") (green $text)" }
+def info [msg: string] { $"(blue ">") ($msg)" }
 
 # Run a derivation phase (skip if empty)
 def runPhase [

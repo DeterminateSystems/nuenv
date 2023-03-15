@@ -11,7 +11,7 @@ def get-file-relative-path [
 def err [
   msg: string # The error string to log
 ] {
-  echo $"(red "ERROR"): ($msg)"
+  $"(red "ERROR"): ($msg)"
 }
 
 # Check that <file> exists and throw an error if not
