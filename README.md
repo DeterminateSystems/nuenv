@@ -24,24 +24,27 @@ You should see build output like this:
 
 ```shell
 just-experimenting> >>> INFO
+just-experimenting> > Building just-experimenting
 just-experimenting> > Running Nushell 0.76.0
 just-experimenting> > Derivation info:
-just-experimenting> ╭────────┬─────────────────────────────────────────────────────────────────────╮
-just-experimenting> │ name   │ just-experimenting                                                  │
-just-experimenting> │ src    │ /nix/store/3prmp9ll1588hk289lm1j8ym3phrn60c-dbpaha1k7n9vfz26mivlzrf │
-just-experimenting> │        │ 8k734r18l-source                                                    │
-just-experimenting> │ out    │ /nix/store/5zg9x84sjqa1ig91ay8wyg9j2fp5na6v-just-experimenting      │
-just-experimenting> │ system │ aarch64-darwin                                                      │
-just-experimenting> ╰────────┴─────────────────────────────────────────────────────────────────────╯
+just-experimenting> ╭─────────┬────────────────────────────────────────────────────────────────────╮
+just-experimenting> │ name    │ just-experimenting                                                 │
+just-experimenting> │ src     │ /nix/store/2cilgykyd5si7zsgr9gi610ax2j4b7z9-j0frjj2z92ryd349b62wf0 │
+just-experimenting> │         │ 9g0cwzjd71-source                                                  │
+just-experimenting> │ system  │ aarch64-darwin                                                     │
+just-experimenting> │ outputs │ doc, out                                                           │
+just-experimenting> ╰─────────┴────────────────────────────────────────────────────────────────────╯
 just-experimenting> >>> SETUP
 just-experimenting> > Adding 2 packages to PATH
 just-experimenting> > Copying sources
 just-experimenting> >>> REALISATION
 just-experimenting> > Running build phase
-just-experimenting> Writing version info to /nix/store/5zg9x84sjqa1ig91ay8wyg9j2fp5na6v-just-experimenting/share/go-version.txt
-just-experimenting> Writing help info to /nix/store/5zg9x84sjqa1ig91ay8wyg9j2fp5na6v-just-experimenting/share/go-help.txt
+just-experimenting> Writing version info to /nix/store/wqr8x38rbpbna82q4nm01wl1n9iypi6h-just-experimenting/share/go-version.txt
+just-experimenting> Writing help info to /nix/store/wqr8x38rbpbna82q4nm01wl1n9iypi6h-just-experimenting/share/go-help.txt
+just-experimenting> Writing docs to /nix/store/jwqswcs09cgi092y4qi8534rg3fnlx53-just-experimenting-doc/share
 just-experimenting> >>> DONE!
-just-experimenting> > Output written to /nix/store/5zg9x84sjqa1ig91ay8wyg9j2fp5na6v-just-experimenting
+just-experimenting> > doc output written to /nix/store/jwqswcs09cgi092y4qi8534rg3fnlx53-just-experimenting-doc
+just-experimenting> > out output written to /nix/store/wqr8x38rbpbna82q4nm01wl1n9iypi6h-just-experimenting
 ```
 
 This derivation does something very straightforward: it runs `go version` to output the version information for the [Go] package in the environment and writes that string to a text file under the `share` directory.
