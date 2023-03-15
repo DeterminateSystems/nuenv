@@ -70,23 +70,21 @@ You can use nuenv to build derivations
 {
   inputs = {
     nixpkgs.url = "nixpkgs/release-22.11";
-    nix-nushell-env.url = "github:DeterminateSystems/nix-nushell-env";
+    nuenv.url = "github:DeterminateSystems/nuenv";
   };
 
-  outputs = { self, nixpkgs, nix-nushell-env }: let
+  outputs = { self, nixpkgs, nuenv }: let
     system = "x86_64-linux";
-    overlays = [ nix-nushell-env.overlays.default ];
+    overlays = [ nuenv.overlays.default ];
     pkgs = import nixpkgs { inherit overlays system; };
   in {
     packages.${system}.default = pkgs.nuenv.mkDerivation {
       name = "hello";
-      pkgs = import nixpkgs { inherit system; };
       src = ./.;
       inherit system;
-      buildPhase = ''
+      # This script is Nushell, not Bash
+      build = ''
         "Hello" | save hello.txt
-      '';
-      installPhase = ''
         let out = $"($env.out)/share"
         mkdir $out
         cp hello.txt $out

@@ -56,11 +56,19 @@
           };
       };
 
+      apps = forAllSystems ({ pkgs, system }: {
+        default = {
+          type = "app";
+          program = "${pkgs.nushell}/bin/nu";
+        };
+      });
+
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
         };
 
+        # A dev environment with Nuenv's helper functions available
         nuenv = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
           shellHook = ''
