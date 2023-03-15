@@ -46,7 +46,6 @@
             __structuredAttrs = true;
 
             # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-            __nu_nushell_version = nushell.version;
             __nu_envFile = ./env.nu;
             __nu_packages = packages ++ [ nushell ];
             __nu_debug = debug;

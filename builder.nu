@@ -23,7 +23,7 @@ let packages = (
   | split row (char space)
 )
 
-let nushellVersion = $attrs.__nu_nushell_version
+let nushellVersion = (version).version
 let envFile = $attrs.__nu_envFile
 let debug = ($attrs.__nu_debug | into int) == 1
 
@@ -44,7 +44,6 @@ let srcs = glob $"($drvSrc)/**/*" # Sources to copy into sandbox
 def color [color: string, msg: string] { echo $"(ansi $color)($msg)(ansi reset)" }
 def blue [msg: string] { color "blue" $msg }
 def green [msg: string] { color "green" $msg }
-def purple [msg: string] { color "purple" $msg }
 def red [msg: string] { color "red" $msg }
 
 def banner [text: string] { echo $"(red ">>>") (green $text)" }
@@ -56,20 +55,22 @@ def runPhase [
   phase: string,
 ] {
   if $phase != "" {
-    if $debug { info $"Running (purple $name) phase" }
+    if $debug { info $"Running (blue $name) phase" }
 
     # We need to source the envFile prior to each phase so that custom Nushell
     # commands are registered. Right now there's a single env file but in
     # principle there could be per-phase scripts.
     nu --config $envFile --commands $phase
   } else {
-    if $debug { info $"Skipping (purple $name) phase" }
+    if $debug { info $"Skipping (blue $name) phase" }
   }
 }
 
 ## Provide info about the current derivation
 if $debug {
   banner "INFO"
+
+  info $"Building (blue $drvName)"
 
   # Display Nushell version
   info $"Running Nushell (blue $nushellVersion)"
