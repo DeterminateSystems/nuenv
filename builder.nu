@@ -1,5 +1,7 @@
 ## Parse the build environment
 
+env | select name value
+
 # General Nix values
 let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
 let attrs = open $attrsJsonFile
