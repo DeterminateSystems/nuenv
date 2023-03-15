@@ -77,8 +77,8 @@ if $debug {
   {
     name: $drvName,
     src: $drvSrc,
-    #out: $drvOut,
-    system: $drvSystem
+    system: $drvSystem,
+    outputs: ($outputs | each { $in | get column0 } | str collect ", ")
   } | table
 }
 
