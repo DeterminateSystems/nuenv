@@ -1,25 +1,31 @@
 ## Parse the build environment
 
 # General Nix values
+let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
+let attrs = open $attrsJsonFile
+
 let sandbox = $env.NIX_BUILD_TOP # Sandbox directory
-let drvName = $env.name
-let drvSrc = $env.src
-let drvOut = $env.out
-let drvSystem = $env.system
-let drvBuildScript = $env.build
+let drvName = $attrs.name
+let drvSrc = $attrs.src
+let drvOut = $attrs.outputs.out
+let drvSystem = $attrs.system
+let drvBuildScript = $attrs.build
 let nixStore = $env.NIX_STORE
+
+# Helpers for build scripts
+let-env out = $attrs.outputs.out
 
 # Nushell-specific values
 let packages = (
   # The __nu_packages environment variable is a space-separate string. This
   # pipeline converts into it into a list.
-  $env.__nu_packages
+  $attrs.__nu_packages
   | split row (char space)
 )
 
-let nushellVersion = $env.__nu_nushell_version
-let envFile = $env.__nu_envFile
-let debug = ($env.__nu_debug | into int) == 1
+let nushellVersion = $attrs.__nu_nushell_version
+let envFile = $attrs.__nu_envFile
+let debug = ($attrs.__nu_debug | into int) == 1
 
 # Helper values
 let numPackages = ($packages | length) # Total # of packages added to the env

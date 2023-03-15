@@ -1,6 +1,10 @@
 {
   description = "nuenv: a Nushell environment for Nix";
 
+  inputs = {
+    nixpkgs.url = "nixpkgs"; # Provides Nushell v0.76.0
+  };
+
   outputs = { self, nixpkgs }:
     let
       supportedSystems = [
@@ -38,6 +42,8 @@
             inherit name src system;
             builder = "${nushell}/bin/nu";
             args = [ ./builder.nu ];
+
+            __structuredAttrs = true;
 
             # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
             __nu_nushell_version = nushell.version;
