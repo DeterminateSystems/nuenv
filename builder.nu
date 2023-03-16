@@ -4,8 +4,6 @@
 let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
 let attrs = open $attrsJsonFile
 
-$attrs | table
-
 let sandbox = $env.NIX_BUILD_TOP # Sandbox directory
 let drvName = $attrs.name
 let drvSrc = $attrs.src
