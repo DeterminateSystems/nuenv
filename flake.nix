@@ -76,6 +76,10 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
+          packages = with pkgs; [ nushell ];
+        };
+
+        ci = pkgs.mkShell {
           packages = with pkgs; [ cachix direnv nushell ];
         };
 
@@ -148,7 +152,7 @@
           installPhase = ''
             mkdir -p $out/share
 
-            cp ${self.packages.${system}.default}/share/go-version.txt $out/share/version.txt
+            cp ${self.packages.${system}.default}/share/hello.txt $out/share/hello-from-nushell.txt
           '';
         };
       });

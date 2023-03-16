@@ -4,6 +4,8 @@
 let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
 let attrs = open $attrsJsonFile
 
+$attrs | table
+
 let sandbox = $env.NIX_BUILD_TOP # Sandbox directory
 let drvName = $attrs.name
 let drvSrc = $attrs.src
@@ -16,10 +18,10 @@ let initialPackages = $attrs.__nu_packages # Packages that aren't Nushell
 
 # Nushell-specific values
 let packages = (
-  # The __nu_packages environment variable is a space-separate string. This
-  # pipeline converts into it into a list.
+  # The __nu_packages environment variable is a space-separated string. This
+  # pipeline converts it into a list.
   $initialPackages
-  | append $nushellPkg
+  | append $nushellPkg # Add the Nushell package to the PATH
   | split row (char space)
 )
 
@@ -78,10 +80,10 @@ def runPhase [
 if $debug {
   banner "INFO"
 
-  info $"Building (blue $drvName)"
+  info $"Realising the (blue $drvName) derivation"
 
   # Display Nushell version
-  info $"Running Nushell (blue $nushellVersion)"
+  info $"Using Nushell (blue $nushellVersion)"
 
   info "Derivation info:"
 

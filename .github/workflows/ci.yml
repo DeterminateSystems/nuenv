@@ -30,8 +30,8 @@ jobs:
 
       - name: Set up Nix environment
         run: |
-          nix develop --command direnv allow
-          eval "$(nix develop --command direnv export bash)"
+          nix develop ".#ci" --command direnv allow
+          eval "$(nix develop ".#ci" --command direnv export bash)"
           echo "$PATH" >> $GITHUB_PATH
 
       - name: Binary cache setup
@@ -48,11 +48,11 @@ jobs:
       - name: Build stdenv derivation that depends on Nuenv derivation
         run: |
           nix build --print-build-logs .#other
-          cat result/share/version.txt
+          cat result/share/hello-from-nushell.txt
 
       - name: Cache development environment
         run: |
-          nix develop --profile ${{ env.REPO }}
+          nix develop ".#ci" --profile ${{ env.REPO }}
           cachix push ${{ secrets.CACHIX_CACHE }} ${{ env.REPO }}
 
       - name: Cache build artifacts
