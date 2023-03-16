@@ -22,10 +22,17 @@ let packages = (
 
 let nushellVersion = (version).version
 let envFile = $attrs.__nu_envFile
-let debug = ($attrs.__nu_debug | into int) == 1
 
-# Helper values
-let numPackages = ($packages | length) # Total # of packages added to the env
+def env-to-bool [val: string] {
+  ($val | into int) == 1
+}
+
+let debug = env-to-bool $attrs.__nu_debug
+
+## Helper values
+
+# Total # of packages added to the env (subtract 1 for Nushell itself)
+let numPackages = ($packages | length) - 1
 
 let packagesPath = (
   $packages                      # List of strings
@@ -76,9 +83,8 @@ if $debug {
 
   {
     name: $drvName,
-    src: $drvSrc,
     system: $drvSystem,
-    outputs: ($outputs | each { $in | get column0 } | str collect ", ")
+    outputs: ($outputs | each { $in | get column0 } | str collect ", "),
   } | table
 }
 
@@ -89,7 +95,9 @@ if $debug { banner "SETUP" }
 #mkdir $drvOut
 
 # Add packages to PATH
-if $debug { info $"Adding (blue $numPackages) packages to PATH" }
+let pkgString = $"package(if $numPackages > 1 or $numPackages == 0 { "s" })"
+
+if $debug { info $"Adding (blue $numPackages) ($pkgString) to PATH" }
 
 let-env PATH = $packagesPath
 

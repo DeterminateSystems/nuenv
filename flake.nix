@@ -35,34 +35,35 @@
           , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
           , build ? ""          # The Nushell script used for realisation
-          , debug ? false       # Run in debug mode
+          , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
           }:
 
-          derivation {
-            inherit name outputs src system;
-            builder = "${nushell}/bin/nu";
-            args = [ ./builder.nu ];
+          derivation
+            {
+              inherit name outputs src system;
+              builder = "${nushell}/bin/nu";
+              args = [ ./builder.nu ];
 
-            # When this is set, Nix writes the environment to a JSON file at
-            # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
-            # is cleaner than parsing a bunch of environment variables as strings.
-            __structuredAttrs = true;
+              # When this is set, Nix writes the environment to a JSON file at
+              # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
+              # is cleaner than parsing a bunch of environment variables as strings.
+              __structuredAttrs = true;
 
-            # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-            __nu_envFile = ./env.nu;
-            __nu_packages = packages ++ [ nushell ];
-            __nu_debug = debug;
+              # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
+              __nu_envFile = ./env.nu;
+              __nu_packages = packages ++ [ nushell ];
+              __nu_debug = debug;
 
-            # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
-            build =
-              if builtins.isString build then
-                build
-              else if builtins.isPath build then
-                (builtins.readFile build)
-              else throw "build attribute must be either a string or a path"
-            ;
-          };
+              # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
+              build =
+                if builtins.isString build then
+                  build
+                else if builtins.isPath build then
+                  (builtins.readFile build)
+                else throw "build attribute must be either a string or a path"
+              ;
+            };
       };
 
       apps = forAllSystems ({ pkgs, system }: {
@@ -98,7 +99,6 @@
           outputs = [ "out" "doc" ];
           src = ./.;
           build = ./example.nu;
-          debug = true;
         };
 
         # The Nushell-based derivation above but with debug mode disabled
@@ -109,6 +109,7 @@
           packages = with pkgs; [ go ];
           src = ./.;
           build = ./example.nu;
+          debug = false;
         };
 
         # The same derivation above but using the stdenv
