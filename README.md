@@ -1,4 +1,4 @@
-# nuenv, a Nushell environment for Nix
+# Nuenv: an experimental Nushell environment for Nix
 
 > **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for
 > others&mdash;but not something you should use for any serious purpose.
