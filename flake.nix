@@ -52,8 +52,9 @@
 
               # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
               __nu_envFile = ./env.nu;
-              __nu_packages = packages ++ [ nushell ];
+              __nu_packages = packages;
               __nu_debug = debug;
+              __nu_nushell = nushell;
 
               # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
               build =
@@ -92,11 +93,10 @@
 
         # An example Nushell-based derivation
         nushell = pkgs.nuenv.mkDerivation {
-          name = "just-experimenting";
+          name = "cow-says-hello";
           inherit system;
           nushell = pkgs.nushell;
-          packages = with pkgs; [ go ];
-          outputs = [ "out" "doc" ];
+          packages = with pkgs; [ coreutils ponysay ];
           src = ./.;
           build = ./example.nu;
         };

@@ -1,13 +1,22 @@
 ## Functions that can be used in derivation phases
 
-# Get the relative path of <path> extracted from /private/tmp/<dir>/<path>.
-def get-file-relative-path [
+# Get the relative path of <path> extracted from /$env.NIX_BUILD_TOP/<dir>/<path>.
+# The default value for $env.NIX_BUILD_TOP is /private/tmp.
+def getSandboxRelativePath [
   path: path # The path to extract
 ] {
   let sandbox = $env.NIX_BUILD_TOP
   $path | parse $"($sandbox)/{path}" | select path | get path.0
 }
 
+# Display a pretty log message.
+def log [
+  msg: string # The message to log.
+] {
+  $"(ansi green)+(ansi reset) ($msg)"
+}
+
+# Output the error <msg> in a flashy way.
 def err [
   msg: string # The error string to log
 ] {
@@ -19,7 +28,7 @@ def ensureFileExists [
   file: path # The path to check for existence
 ] {
   if not ($file | path exists) {
-    let relativeFilePath = get-file-relative-path $file
+    let relativeFilePath = getSandboxRelativePath $file
     err $"File not found at: (ansi red)($relativeFilePath)(ansi reset)"
     exit 1
   }

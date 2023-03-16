@@ -1,20 +1,22 @@
-let share = $"($env.out)/share"
+# Variables
+let out = $env.out
+let pony = "caesar"
+let share = $"($out)/share"
+let outputFile = "hello.txt"
+let thought = "Realising Nix derivations with Bash"
+
+# Setup
+log $"Creating output directory at ($out)"
 mkdir $share
 
-let versionFile = $"($share)/go-version.txt"
-echo $"Writing version info to ($versionFile)"
-go version | save $versionFile
+# Build
+log $"Writing dreamy equine thoughts to ($outputFile)"
+$thought | ponythink --pony $pony | save $outputFile
 
-let helpFile = $"($share)/go-help.txt"
-echo $"Writing help info to ($helpFile)"
-go help | save $helpFile
+# Install
+log $"Copying ($outputFile) to ($out)"
+cp $outputFile $share
 
-[$versionFile $helpFile] | each {|f|
-  substituteInPlace $f --replace "go" --with "golang"
-}
+substituteInPlace $outputFile --replace "Bash" --with "Nushell"
 
-let docOut = $"($env.doc)/share"
-mkdir $docOut
-
-echo $"Writing docs to ($docOut)"
-"Here is the documentation" | save $"($docOut)/docs.txt"
+log "Done!"

@@ -11,20 +11,24 @@ let drvSystem = $attrs.system
 let drvBuildScript = $attrs.build
 let nixStore = $env.NIX_STORE
 let outputs = ($attrs.outputs | transpose)
+let nushellPkg = $attrs.__nu_nushell # The Nushell package
+let initialPackages = $attrs.__nu_packages # Packages that aren't Nushell
 
 # Nushell-specific values
 let packages = (
   # The __nu_packages environment variable is a space-separate string. This
   # pipeline converts into it into a list.
-  $attrs.__nu_packages
+  $initialPackages
+  | append $nushellPkg
   | split row (char space)
 )
 
 let nushellVersion = (version).version
 let envFile = $attrs.__nu_envFile
 
-def env-to-bool [val: string] {
-  ($val | into int) == 1
+# Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
+def env-to-bool [var: string] {
+  ($var | into int) == 1
 }
 
 let debug = env-to-bool $attrs.__nu_debug
@@ -32,7 +36,7 @@ let debug = env-to-bool $attrs.__nu_debug
 ## Helper values
 
 # Total # of packages added to the env (subtract 1 for Nushell itself)
-let numPackages = ($packages | length) - 1
+let numPackages = ($initialPackages | length)
 
 let packagesPath = (
   $packages                      # List of strings
@@ -97,7 +101,7 @@ if $debug { banner "SETUP" }
 # Add packages to PATH
 let pkgString = $"package(if $numPackages > 1 or $numPackages == 0 { "s" })"
 
-if $debug { info $"Adding (blue $numPackages) ($pkgString) to PATH" }
+if $debug { info $"Adding (blue $numPackages) ($pkgString) to PATH:" }
 
 let-env PATH = $packagesPath
 
