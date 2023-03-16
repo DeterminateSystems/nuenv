@@ -42,8 +42,7 @@ jobs:
       - name: Build Nuenv derivation
         run: |
           nix build --print-build-logs
-          cat result/share/go-help.txt
-          cat result/share/go-version.txt
+          cat result/share/hello.txt
 
       - name: Build stdenv derivation that depends on Nuenv derivation
         run: |
