@@ -1,3 +1,6 @@
+# Quick debugging thing
+env | select name value
+
 # Variables
 let out = $env.out
 let share = $"($out)/share"
