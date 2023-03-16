@@ -9,7 +9,10 @@ on:
 jobs:
   # Build the Docker image using Nix
   build:
-    runs-on: macos-12
+    strategy:
+      matrix:
+        os: [ubuntu-12, macos-12]
+    runs-on: ${{ matrix.os }}
     environment: build
     steps:
       - name: git checkout
