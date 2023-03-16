@@ -152,7 +152,7 @@
           installPhase = ''
             mkdir -p $out/share
 
-            cp ${self.packages.${system}.default}/share/hello.txt $out/share/hello-from-nushell.txt
+            cp ${self.packages.${system}.default}/share/happy-thought.txt $out/share/happy-though-about-nushell.txt
           '';
         };
       });
