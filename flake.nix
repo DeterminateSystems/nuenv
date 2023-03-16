@@ -75,7 +75,7 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ nushell ];
+          packages = with pkgs; [ cachix direnv nushell ];
         };
 
         # A dev environment with Nuenv's helper functions available

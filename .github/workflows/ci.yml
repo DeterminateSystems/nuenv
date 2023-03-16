@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+env:
+  REPO: ${{ github.event.repository.name }}
+
 jobs:
   # Build the Docker image using Nix
   build:
@@ -18,8 +21,23 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v3
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/nix-installer-action@v1
+        with:
+          extra-conf: |
+            binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }}
+            trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+
+      - name: Set up Nix environment
+        run: |
+          nix develop --command direnv allow
+          eval "$(nix develop --command direnv export bash)"
+          echo "$PATH" >> $GITHUB_PATH
+
+      - name: Binary cache setup
+        run: |
+          cachix authtoken ${{ secrets.CACHIX_AUTH_TOKEN }}
+          cachix use ${{ secrets.CACHIX_CACHE }}
 
       - name: Build Nuenv derivation
         run: |
@@ -31,3 +49,14 @@ jobs:
         run: |
           nix build --print-build-logs .#other
           cat result/share/version.txt
+
+      - name: Cache development environment
+        run: |
+          nix develop --profile ${{ env.REPO }}
+          cachix push ${{ secrets.CACHIX_CACHE }} ${{ env.REPO }}
+
+      - name: Cache build artifacts
+        run: |
+          nix flake archive --json \
+            | jq -r '.path,(.inputs|to_entries[].value.path)' \
+            | cachix push "${{ secrets.CACHIX_CACHE }}"
