@@ -19,7 +19,9 @@
       });
     in
     {
-      overlays = {
+      overlays = rec {
+        default = nuenv;
+
         nuenv = (final: prev: {
           nuenv.mkDerivation = self.lib.mkNushellDerivation;
         });

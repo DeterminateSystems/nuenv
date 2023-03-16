@@ -75,6 +75,7 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
       name = "hello";
       src = ./.;
       inherit system;
+      nushell = pkgs.nushell;
       # This script is Nushell, not Bash
       build = ''
         "Hello" | save hello.txt
