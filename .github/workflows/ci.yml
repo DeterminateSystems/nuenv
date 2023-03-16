@@ -9,7 +9,7 @@ on:
 jobs:
   # Build the Docker image using Nix
   build:
-    runs-on: ubuntu-22.04
+    runs-on: macos-12
     environment: build
     steps:
       - name: git checkout
