@@ -4,6 +4,7 @@
 > others&mdash;but not something you should use for any serious purpose.
 
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
+For more information, check out [Nuenv: an experimental Nushell environment for Nix][post] on the [Determinate Systems blog][blog].
 
 ## Running the scenario
 
@@ -89,11 +90,13 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
 ```
 
 [bash]: https://gnu.org/software/bash
+[blog]: https://determinate.systems/posts
 [derivation]: https://zero-to-nix.com/concepts/derivations
 [flake]: https://zero-to-nix.com/concepts/flakes
 [dni]: https://github.com/DeterminateSystems/nix-installer
 [nix]: https://nixos.org
 [nushell]: https://nushell.sh
 [ponythink]: https://github.com/erkin/ponysay
+[post]: https://determinate.systems/posts/nuenv
 [realise]: https://zero-to-nix.com/concepts/realisation
 [stdenv]: https://ryantm.github.io/nixpkgs/stdenv/stdenv
