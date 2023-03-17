@@ -1,12 +1,20 @@
 ## Functions that can be used in derivation phases
 
-# Get the relative path of <path> extracted from /($env.NIX_BUILD_TOP)/<_dir>/<path>.
-# The default value for $env.NIX_BUILD_TOP is /private/tmp.
-def getSandboxRelativePath [
+# Get the relative path of <path>. If <path> is in the temporary build
+# directory, this returns /($env.NIX_BUILD_TOP)/<__dir>/<path>. If <path> is in
+# the Nix store, this returns /($env.NIX_STORE)/<__pkg>/<path>. The default
+# value for $env.NIX_BUILD_TOP is /private/tmp while the default for
+# $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
+def relativePath [
   path: path # The path to extract
 ] {
-  let sandbox = $env.NIX_BUILD_TOP
-  $path | parse $"($sandbox)/{path}" | select path | get path.0
+  if ($path | str starts-with $env.NIX_BUILD_TOP) {
+    $path | parse $"($env.NIX_BUILD_TOP)/{path}" | select path | get path.0
+  } else if ($path | str starts-with $env.NIX_STORE) {
+    $path | parse $"($env.NIX_STORE)/{_pkg}/{path}" | select path | get path.0
+  } else {
+    $path
+  }
 }
 
 # Display a pretty log message.
@@ -28,7 +36,7 @@ def ensureFileExists [
   file: path # The path to check for existence
 ] {
   if not ($file | path exists) {
-    let relativeFilePath = getSandboxRelativePath $file
+    let relativeFilePath = relativePath $file
     err $"File not found at: (ansi red)($relativeFilePath)(ansi reset)"
     exit 1
   }

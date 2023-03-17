@@ -35,11 +35,20 @@
           , src                 # The derivation's sources
           , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
-          , build ? ""          # The Nushell script used for realisation
+          , build ? ""          # The build phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
           }:
 
+          let
+            # Enables you to pass either raw strings or filepaths as phases
+            getPhase = s:
+              if builtins.isString s then
+                s
+              else if builtins.isPath s then
+                (builtins.readFile s)
+              else throw "${s} attribute must be either a string or a path";
+          in
           derivation
             {
               inherit name outputs src system;
@@ -57,13 +66,7 @@
               __nu_debug = debug;
 
               # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
-              build =
-                if builtins.isString build then
-                  build
-                else if builtins.isPath build then
-                  (builtins.readFile build)
-                else throw "build attribute must be either a string or a path"
-              ;
+              build = getPhase build;
             };
       };
 
@@ -100,8 +103,9 @@
           name = "cow-says-hello";
           inherit system;
           packages = with pkgs; [ coreutils ponysay ];
+          outputs = [ "out" "doc" ];
           src = ./.;
-          build = ./example.nu;
+          build = ./example/build.nu;
         };
 
         # The Nushell-based derivation above but with debug mode disabled
@@ -110,7 +114,7 @@
           inherit system;
           packages = with pkgs; [ go ];
           src = ./.;
-          build = ./example.nu;
+          build = ./example/build.nu;
           debug = false;
         };
 

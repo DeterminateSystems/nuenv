@@ -10,10 +10,10 @@ log $"Creating output directory at ($out)"
 mkdir $share
 
 # Build
-log $"Writing dreamy equine thoughts to ($outputFile)"
+log $"Writing dreamy equine thoughts to (relativePath $outputFile)"
 $thought | ponythink --pony $pony | save $outputFile
 
 # Install
-log $"Substituting text in ($outputFile)"
+log $"Substituting text in (relativePath $outputFile)"
 
 substituteInPlace $outputFile --replace "Bash" --with "Nushell"
