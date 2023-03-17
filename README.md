@@ -68,23 +68,27 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
   };
 
   outputs = { self, nixpkgs, nuenv }: let
-    system = "x86_64-linux";
     overlays = [ nuenv.overlays.default ];
-    pkgs = import nixpkgs { inherit overlays system; };
-  in {
-    packages.${system}.default = pkgs.nuenv.mkDerivation {
-      name = "hello";
-      src = ./.;
+    systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f {
       inherit system;
-      nushell = pkgs.nushell;
-      # This script is Nushell, not Bash
-      build = ''
-        "Hello" | save hello.txt
-        let out = $"($env.out)/share"
-        mkdir $out
-        cp hello.txt $out
-      '';
-    };
+      pkgs = import nixpkgs { inherit system; };
+    });
+  in {
+    packages = forAllSystems ({ pkgs, system }: {
+      default = pkgs.nuenv.mkDerivation {
+        name = "hello";
+        src = ./.;
+        inherit system;
+        # This script is Nushell, not Bash
+        build = ''
+          "Hello" | save hello.txt
+          let out = $"($env.out)/share"
+          mkdir $out
+          cp hello.txt $out
+        '';
+      };
+    });
   };
 }
 ```

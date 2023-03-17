@@ -23,16 +23,15 @@
         default = nuenv;
 
         nuenv = (final: prev: {
-          nuenv.mkDerivation = self.lib.mkNushellDerivation;
+          nuenv.mkDerivation = self.lib.mkNushellDerivation final;
         });
       };
 
       lib = {
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
-        mkNushellDerivation =
-          { nushell             # Nushell package
-          , name                # The name of the derivation
+        mkNushellDerivation = pkgs:
+          { name                # The name of the derivation
           , src                 # The derivation's sources
           , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
@@ -44,19 +43,18 @@
           derivation
             {
               inherit name outputs src system;
-              builder = "${nushell}/bin/nu";
+              builder = "${pkgs.nushell}/bin/nu";
               args = [ ./builder.nu ];
 
               # When this is set, Nix writes the environment to a JSON file at
               # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
-              # is cleaner than parsing a bunch of environment variables as strings.
+              # is generally cleaner than parsing environment variables as strings.
               __structuredAttrs = true;
 
               # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
               __nu_envFile = ./env.nu;
               __nu_packages = packages;
               __nu_debug = debug;
-              __nu_nushell = nushell;
 
               # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
               build =
@@ -101,7 +99,6 @@
         nushell = pkgs.nuenv.mkDerivation {
           name = "cow-says-hello";
           inherit system;
-          nushell = pkgs.nushell;
           packages = with pkgs; [ coreutils ponysay ];
           src = ./.;
           build = ./example.nu;
@@ -111,7 +108,6 @@
         nushellNoDebug = pkgs.nuenv.mkDerivation {
           name = "just-experimenting";
           inherit system;
-          nushell = pkgs.nushell;
           packages = with pkgs; [ go ];
           src = ./.;
           build = ./example.nu;

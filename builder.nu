@@ -1,5 +1,10 @@
-## Parse the build environment
+## Helper functions
+# Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
+def env-to-bool [var: string] {
+  ($var | into int) == 1
+}
 
+## Parse the build environment
 # General Nix values
 let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
 let attrs = open $attrsJsonFile
@@ -11,10 +16,9 @@ let drvSystem = $attrs.system
 let drvBuildScript = $attrs.build
 let nixStore = $env.NIX_STORE
 let outputs = ($attrs.outputs | transpose)
-let nushellPkg = $attrs.__nu_nushell # The Nushell package
+let nushellVersion = (version).version # Nushell version
+let nushellPkg = ($attrs.builder | parse $"{root}/bin/nu" | get root.0) # Nushell package path
 let initialPackages = $attrs.__nu_packages # Packages that aren't Nushell
-
-# Nushell-specific values
 let packages = (
   # The __nu_packages environment variable is a space-separated string. This
   # pipeline converts it into a list.
@@ -22,20 +26,11 @@ let packages = (
   | append $nushellPkg # Add the Nushell package to the PATH
   | split row (char space)
 )
-
-let nushellVersion = (version).version
 let envFile = $attrs.__nu_envFile
-
-# Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
-def env-to-bool [var: string] {
-  ($var | into int) == 1
-}
-
 let debug = env-to-bool $attrs.__nu_debug
 
 ## Helper values
-
-# Total # of packages added to the env (subtract 1 for Nushell itself)
+# Total # of packages added to the env by the user
 let numPackages = ($initialPackages | length)
 
 let packagesPath = (
@@ -53,6 +48,7 @@ def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
 def blue [msg: string] { color "blue" $msg }
 def green [msg: string] { color "green" $msg }
 def red [msg: string] { color "red" $msg }
+def purple [msg: string] { color "purple" $msg }
 
 def banner [text: string] { $"(red ">>>") (green $text)" }
 def info [msg: string] { $"(blue ">") ($msg)" }
@@ -130,6 +126,6 @@ if $debug {
   for output in ($outputs) {
     let name = ($output | get column0)
     let value = ($output | get column1)
-    info $"($name) output written to ($value)"
+    info $"(purple $name) output written to ($value)"
   }
 }

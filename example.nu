@@ -17,5 +17,3 @@ $thought | ponythink --pony $pony | save $outputFile
 log $"Substituting text in ($outputFile)"
 
 substituteInPlace $outputFile --replace "Bash" --with "Nushell"
-
-log "Done!"

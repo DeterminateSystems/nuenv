@@ -1,6 +1,6 @@
 ## Functions that can be used in derivation phases
 
-# Get the relative path of <path> extracted from /$env.NIX_BUILD_TOP/<dir>/<path>.
+# Get the relative path of <path> extracted from /($env.NIX_BUILD_TOP)/<_dir>/<path>.
 # The default value for $env.NIX_BUILD_TOP is /private/tmp.
 def getSandboxRelativePath [
   path: path # The path to extract
@@ -54,9 +54,9 @@ def substitute [
 
 # Substitute all instances of <replace> in <file> with <with>.
 def substituteInPlace [
-  file: path, # The target file
+  ...files: path, # The target file
   --replace (-r): string, # The string to replace in <file>
   --with (-w): string # The replacement for <replace>
 ] {
-  substitute $file $file --replace $replace --with $with
+  $files | each { |file| substitute $file $file --replace $replace --with $with }
 }
