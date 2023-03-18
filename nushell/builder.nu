@@ -104,6 +104,7 @@ for output in ($drv.outputs) {
   mkdir $value # Otherwise realisation fails
 }
 
+# No test suite yet but we should add one
 if env-to-bool $attrs.test {
   banner "TESTING"
 
