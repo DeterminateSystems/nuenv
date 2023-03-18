@@ -2,7 +2,7 @@
   description = "nuenv: a Nushell environment for Nix";
 
   inputs = {
-    nixpkgs.url = "nixpkgs"; # Provides Nushell v0.76.0
+    nixpkgs.url = "nixpkgs/nixpkgs-unstable"; # Provides Nushell v0.76.0
   };
 
   outputs = { self, nixpkgs }:
@@ -39,11 +39,12 @@
           , install ? ""        # The install phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
+          , test ? false        # Whether to test the Nushell builder
           }:
 
           derivation
             {
-              inherit build install name outputs src system;
+              inherit build install name outputs src system test;
               builder = "${pkgs.nushell}/bin/nu";
               args = [ ./nushell/builder.nu ];
 
@@ -79,73 +80,84 @@
         nuenv = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
           shellHook = ''
-            nu --config ./env.nu
+            nu --config ./nushell/user-env.nu
           '';
         };
       });
 
-      packages = forAllSystems ({ pkgs, system }: rec {
-        default = nushell;
+      packages = forAllSystems
+        ({ pkgs, system }: rec {
+          default = nushell;
 
-        # An example Nushell-based derivation
-        nushell = pkgs.nuenv.mkDerivation {
-          name = "cow-says-hello";
-          inherit system;
-          packages = with pkgs; [ coreutils ponysay ];
-          outputs = [ "out" "doc" ];
-          src = ./.;
-          build = builtins.readFile ./example/build.nu;
-        };
+          # An example Nushell-based derivation
+          nushell = pkgs.nuenv.mkDerivation {
+            name = "cow-says-hello";
+            inherit system;
+            packages = with pkgs; [ coreutils ponysay ];
+            outputs = [ "out" "doc" ];
+            src = ./.;
+            build = builtins.readFile ./example/build.nu;
+          };
 
-        # The Nushell-based derivation above but with debug mode disabled
-        nushellNoDebug = pkgs.nuenv.mkDerivation {
-          name = "just-experimenting";
-          inherit system;
-          packages = with pkgs; [ coreutils ponysay ];
-          src = ./.;
-          build = builtins.readFile ./example/build.nu;
-          debug = false;
-        };
+          # The Nushell-based derivation above but with debug mode disabled
+          nushellNoDebug = pkgs.nuenv.mkDerivation {
+            name = "just-experimenting";
+            inherit system;
+            packages = with pkgs; [ coreutils ponysay ];
+            src = ./.;
+            build = builtins.readFile ./example/build.nu;
+            debug = false;
+          };
 
-        # The same derivation above but using the stdenv
-        std = pkgs.stdenv.mkDerivation {
-          name = "just-experimenting";
-          inherit system;
-          buildInputs = with pkgs; [ go ];
-          src = ./.;
-          outputs = [ "out" "doc" ];
-          buildPhase = ''
-            versionFile="go-version.txt"
-            echo "Writing version info to ''${versionFile}"
-            go version > $versionFile
-            substituteInPlace $versionFile --replace "go" "golang"
+          test = pkgs.nuenv.mkDerivation {
+            name = "test-nushell-logic";
+            inherit system;
+            packages = [ ];
+            src = ./.;
+            build = "";
+            debug = true;
+            test = true;
+          };
 
-            helpFile="go-help.txt"
-            echo "Writing help info to ''${helpFile}"
-            go help > $helpFile
-            substituteInPlace $helpFile --replace "go" "golang"
+          # The same derivation above but using the stdenv
+          std = pkgs.stdenv.mkDerivation {
+            name = "just-experimenting";
+            inherit system;
+            buildInputs = with pkgs; [ go ];
+            src = ./.;
+            outputs = [ "out" "doc" ];
+            buildPhase = ''
+              versionFile="go-version.txt"
+              echo "Writing version info to ''${versionFile}"
+              go version > $versionFile
+              substituteInPlace $versionFile --replace "go" "golang"
 
-            echo "Docs!" > docs.txt
-          '';
-          installPhase = ''
-            mkdir -p $out/share
-            cp go-*.txt $out/share
+              helpFile="go-help.txt"
+              echo "Writing help info to ''${helpFile}"
+              go help > $helpFile
+              substituteInPlace $helpFile --replace "go" "golang"
 
-            mkdir -p $doc/share
-            cp docs.txt $doc/share
-          '';
-        };
+              echo "Docs!" > docs.txt
+            '';
+            installPhase = ''
+              mkdir -p $out/share
+              cp go-*.txt $out/share
 
-        # Derivation that relies on the Nushell derivation
-        other = pkgs.stdenv.mkDerivation {
-          name = "other";
-          src = ./.;
-          installPhase = ''
-            mkdir -p $out/share
+              mkdir -p $doc/share
+              cp docs.txt $doc/share
+            '';
+          };
 
-            cp ${self.packages.${system}.default}/share/happy-thought.txt $out/share/happy-though-about-nushell.txt
-          '';
-        };
-      });
+          # Derivation that relies on the Nushell derivation
+          other = pkgs.stdenv.mkDerivation {
+            name = "other";
+            src = ./.;
+            installPhase = ''
+              mkdir -p $out/share
+
+              cp ${self.packages.${system}.default}/share/happy-thought.txt $out/share/happy-though-about-nushell.txt
+            '';
+          };
+        });
     };
 }

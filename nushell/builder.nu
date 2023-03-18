@@ -63,7 +63,7 @@ if $nix.debug {
   info $"Realising the (blue $drv.name) derivation for (blue $drv.system)"
   info $"Using Nushell (blue $nushell.version)"
 
-  info "Outputs:"
+  info "Declared build outputs:"
   for output in $drv.outputs { item $output.key }
 }
 
@@ -85,7 +85,7 @@ if $nix.debug {
 
 # Collect all packages into a string and set PATH
 let packagesPath = (
-  $drv.packages                   # List of strings
+  $drv.packages                  # List of strings
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
   | str collect (char esep)      # Collect into a single colon-separate string
 )
@@ -95,16 +95,23 @@ let-env PATH = $packagesPath
 if $nix.debug { info "Copying sources" }
 for src in $drv.src { cp -r $src $nix.sandbox }
 
-## The realisation process
-if $nix.debug { banner "REALISATION" }
-
 # Create output directories and set environment variables for all outputs
+if $nix.debug { info "Creating output directories" }
 for output in ($drv.outputs) {
   let name = ($output | get key)
   let value = ($output | get value)
   let-env $name = $value
   mkdir $value # Otherwise realisation fails
 }
+
+if env-to-bool $attrs.test {
+  banner "TESTING"
+
+  exit 0
+}
+
+## The realisation process
+if $nix.debug { banner "REALISATION" }
 
 ## Realisation phases (just build and install for now, more later)
 

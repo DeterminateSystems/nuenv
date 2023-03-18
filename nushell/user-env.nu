@@ -1,10 +1,9 @@
 ## Functions that can be used in derivation phases
 
-# Get the relative path of <path>. If <path> is in the temporary build
-# directory, this returns /($env.NIX_BUILD_TOP)/<__dir>/<path>. If <path> is in
-# the Nix store, this returns /($env.NIX_STORE)/<__pkg>/<path>. The default
-# value for $env.NIX_BUILD_TOP is /private/tmp while the default for
-# $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
+# Get the relative path of <path>. If <path> is in the temporary build directory, this returns
+# /($env.NIX_BUILD_TOP)/<__dir>/<path>. If <path> is in the Nix store, this returns
+# /($env.NIX_STORE)/<__pkg>/<path>. The default value for $env.NIX_BUILD_TOP is /private/tmp while
+# the default for $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
 def relativePath [
   path: path # The path to extract
 ] {
@@ -17,7 +16,7 @@ def relativePath [
   }
 }
 
-# Display a pretty log message.
+# Display the <msg> in a pretty way.
 def log [
   msg: string # The message to log.
 ] {
@@ -31,7 +30,7 @@ def err [
   $"(red "ERROR"): ($msg)"
 }
 
-# Check that <file> exists and throw an error if not
+# Check that <file> exists and throw an error if it doesn't.
 def ensureFileExists [
   file: path # The path to check for existence
 ] {
@@ -42,7 +41,8 @@ def ensureFileExists [
   }
 }
 
-# Substitute all instances of <replace> in <file> with <with> and output the resulting string to <out>.
+# Substitute all instances of <replace> in <file> with <with> and output the resulting string to
+# <out>.
 def substitute [
   file: path, # The target file
   out: path, # The output file
@@ -60,11 +60,18 @@ def substitute [
   $s | save $out
 }
 
-# Substitute all instances of <replace> in <file> with <with>.
+# Substitute all instances of the string <replace> in <file> with the string <with>.
 def substituteInPlace [
   ...files: path, # The target file
   --replace (-r): string, # The string to replace in <file>
   --with (-w): string # The replacement for <replace>
 ] {
   $files | each { |file| substitute $file $file --replace $replace --with $with }
+}
+
+# Display Nuenv-specific commands.
+def nuenv-commands [] {
+  help commands
+  | where command_type == "custom"
+  | where not name in ["create_left_prompt" "create_right_prompt"]
 }
