@@ -22,9 +22,9 @@
       overlays = rec {
         default = nuenv;
 
-        nuenv = (final: prev: {
+        nuenv = final: prev: {
           nuenv.mkDerivation = self.lib.mkNushellDerivation final;
-        });
+        };
       };
 
       lib = {
@@ -36,24 +36,16 @@
           , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
           , build ? ""          # The build phase
+          , install ? ""        # The install phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
           }:
 
-          let
-            # Enables you to pass either raw strings or filepaths as phases
-            getPhase = s:
-              if builtins.isString s then
-                s
-              else if builtins.isPath s then
-                (builtins.readFile s)
-              else throw "${s} attribute must be either a string or a path";
-          in
           derivation
             {
-              inherit name outputs src system;
+              inherit build install name outputs src system;
               builder = "${pkgs.nushell}/bin/nu";
-              args = [ ./builder.nu ];
+              args = [ ./nushell/builder.nu ];
 
               # When this is set, Nix writes the environment to a JSON file at
               # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
@@ -61,12 +53,9 @@
               __structuredAttrs = true;
 
               # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-              __nu_envFile = ./env.nu;
+              __nu_user_env_file = ./nushell/user-env.nu;
               __nu_packages = packages;
               __nu_debug = debug;
-
-              # The Nushell build logic for the derivation (either a raw string or a path to a .nu file)
-              build = getPhase build;
             };
       };
 
@@ -105,16 +94,16 @@
           packages = with pkgs; [ coreutils ponysay ];
           outputs = [ "out" "doc" ];
           src = ./.;
-          build = ./example/build.nu;
+          build = builtins.readFile ./example/build.nu;
         };
 
         # The Nushell-based derivation above but with debug mode disabled
         nushellNoDebug = pkgs.nuenv.mkDerivation {
           name = "just-experimenting";
           inherit system;
-          packages = with pkgs; [ go ];
+          packages = with pkgs; [ coreutils ponysay ];
           src = ./.;
-          build = ./example/build.nu;
+          build = builtins.readFile ./example/build.nu;
           debug = false;
         };
 
