@@ -100,7 +100,6 @@
             outputs = [ "out" "doc" ];
             src = ./.;
             build = builtins.readFile ./example/build.nu;
-            __nu_debug = false;
           };
 
           # The Nushell-based derivation above but with debug mode disabled
