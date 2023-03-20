@@ -46,7 +46,8 @@ let drv = {
     $initialPkgs
     | append $nushell.pkg # Add the Nushell package to the PATH
     | split row (char space)
-  )
+  ),
+  extraAttrs: ($attrs.__nu_extra_attrs | transpose key value), # Arbitrary environment variables
 }
 
 # Nix build attributes
@@ -84,12 +85,31 @@ if $nix.debug {
 }
 
 # Collect all packages into a string and set PATH
+if $nix.debug { info $"Setting (purple "PATH")" }
+
 let packagesPath = (
   $drv.packages                  # List of strings
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
   | str collect (char esep)      # Collect into a single colon-separate string
 )
 let-env PATH = $packagesPath
+
+# Set user-supplied environment variables (à la FOO="bar")
+let extraAttrsList = $drv.extraAttrs
+if $nix.debug {
+  let numAttrs = ($extraAttrsList | length)
+  if not ($numAttrs | is-empty) {
+    info $"Setting ($numAttrs) user-supplied environment variables"
+
+    for attr in $extraAttrsList {
+      item $"($attr.key)=($attr.value)"
+    }
+  }
+}
+
+for attr in $drv.extraAttrs {
+  let-env $attr.key = $attr.value
+}
 
 # Copy sources
 if $nix.debug { info "Copying sources" }

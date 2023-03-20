@@ -38,8 +38,20 @@
           , build ? ""          # The build phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
-          }:
+          , ...
+          }@attrs:
 
+          let
+            # Gather arbitrary user-supplied env vars
+            extraAttrs = removeAttrs attrs [
+              "build"
+              "name"
+              "outputs"
+              "packages"
+              "src"
+              "system"
+            ];
+          in
           derivation {
             # Derivation
             inherit name outputs src system;
@@ -60,6 +72,7 @@
             __nu_user_env_file = ./nushell/user-env.nu;
             __nu_packages = packages;
             __nu_debug = debug;
+            __nu_extra_attrs = extraAttrs;
           };
       };
 
@@ -100,6 +113,8 @@
             outputs = [ "out" "doc" ];
             src = ./.;
             build = builtins.readFile ./example/build.nu;
+
+            FOO = "bar";
           };
 
           # The Nushell-based derivation above but with debug mode disabled
