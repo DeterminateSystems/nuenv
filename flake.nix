@@ -43,7 +43,7 @@
 
           let
             # Gather arbitrary user-supplied env vars
-            extraAttrs = removeAttrs attrs [
+            reservedAttrs = [
               "build"
               "name"
               "outputs"
@@ -51,6 +51,8 @@
               "src"
               "system"
             ];
+
+            extraAttrs = removeAttrs attrs reservedAttrs;
           in
           derivation {
             # Derivation
