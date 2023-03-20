@@ -126,6 +126,7 @@
             src = ./.;
             build = builtins.readFile ./example/build.nu;
             debug = false;
+            BOOPER = "bopper";
           };
 
           test = pkgs.nuenv.mkDerivation {

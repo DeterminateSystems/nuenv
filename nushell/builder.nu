@@ -12,6 +12,8 @@ def banner [text: string] { $"(red ">>>") (green $text)" }
 def info [msg: string] { $"(blue ">") ($msg)" }
 def item [msg: string] { $"(purple "+") ($msg)"}
 
+def plural [n: int] { if $n > 1 { "s" } else { "" } }
+
 # Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
 def env-to-bool [var: string] {
   ($var | into int) == 1
@@ -77,7 +79,7 @@ if $nix.debug { banner "SETUP" }
 let numPackages = ($drv.initialPackages | length)
 let pkgString = $"package(if $numPackages > 1 or $numPackages == 0 { "s" })"
 if $nix.debug {
-  info $"Adding (blue $numPackages) ($pkgString) to PATH:"
+  info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
 
   for pkg in $drv.initialPackages {
     let name = ($pkg | parse $"($nix.store)/{__hash}-{pkg}" | select pkg | get pkg.0)
@@ -99,10 +101,8 @@ let-env PATH = $packagesPath
 # list by removing reserved attributes (name, system, build, src, system, etc.).
 if $nix.debug {
   let numAttrs = ($drv.extraAttrs | length)
-  let varString = $"variable(if $numAttrs > 1 or $numPackages == 0 { "s" })"
-
   if not ($numAttrs == 0) {
-    info $"Setting (blue $numAttrs) user-supplied environment ($varString):"
+    info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):"
 
     for attr in $drv.extraAttrs {
       item $"(yellow $attr.key) = \"($attr.value)\""
