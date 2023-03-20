@@ -6,6 +6,7 @@ def blue [msg: string] { color "blue" $msg }
 def green [msg: string] { color "green" $msg }
 def red [msg: string] { color "red" $msg }
 def purple [msg: string] { color "purple" $msg }
+def yellow [msg: string] { color "yellow" $msg }
 
 def banner [text: string] { $"(red ">>>") (green $text)" }
 def info [msg: string] { $"(blue ">") ($msg)" }
@@ -94,21 +95,20 @@ let packagesPath = (
 )
 let-env PATH = $packagesPath
 
-# Set user-supplied environment variables (à la FOO="bar")
-let extraAttrsList = $drv.extraAttrs
+# Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
+# list by removing reserved attributes (name, system, build, src, system, etc.).
 if $nix.debug {
-  let numAttrs = ($extraAttrsList | length)
-  if not ($numAttrs | is-empty) {
-    info $"Setting ($numAttrs) user-supplied environment variables"
+  let numAttrs = ($drv.extraAttrs | length)
+  let varString = $"variable(if $numAttrs > 1 or $numPackages == 0 { "s" })"
 
-    for attr in $extraAttrsList {
-      item $"($attr.key)=($attr.value)"
+  if not ($numAttrs == 0) {
+    info $"Setting (blue $numAttrs) user-supplied environment ($varString):"
+
+    for attr in $drv.extraAttrs {
+      item $"(yellow $attr.key)=($attr.value)"
+      let-env $attr.key = $attr.value
     }
   }
-}
-
-for attr in $drv.extraAttrs {
-  let-env $attr.key = $attr.value
 }
 
 # Copy sources

@@ -38,13 +38,14 @@
           , build ? ""          # The build phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
-          , ...
+          , ...                 # Catch user-supplied env vars
           }@attrs:
 
           let
             # Gather arbitrary user-supplied env vars
             reservedAttrs = [
               "build"
+              "debug"
               "name"
               "outputs"
               "packages"
@@ -116,7 +117,7 @@
             src = ./.;
             build = builtins.readFile ./example/build.nu;
 
-            FOO = "bar";
+            BOOPER = "bopper";
           };
 
           # The Nushell-based derivation above but with debug mode disabled
