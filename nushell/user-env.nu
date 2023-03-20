@@ -27,7 +27,7 @@ def log [
 def err [
   msg: string # The error string to log
 ] {
-  $"(red "ERROR"): ($msg)"
+  $"(ansi red)ERROR(ansi reset): ($msg)"
 }
 
 # Check that <file> exists and throw an error if it doesn't.

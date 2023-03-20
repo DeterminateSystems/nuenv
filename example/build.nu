@@ -13,8 +13,8 @@ log $"Creating output directory at ($out)"
 mkdir $share
 
 # Build
-log $"Writing a nice greeting to (relativePath $outputFile)"
-$thought | hello
+log $"Writing dreamy equine thoughts to (relativePath $outputFile)"
+$thought | ponythink --pony $pony | save $outputFile
 
 # Install
 log $"Substituting text in (relativePath $outputFile)"

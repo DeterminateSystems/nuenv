@@ -110,9 +110,9 @@
 
           # An example Nushell-based derivation
           nushell = pkgs.nuenv.mkDerivation {
-            name = "cow-says-hello";
+            name = "pony-greeting";
             inherit system;
-            packages = with pkgs; [ hello ];
+            packages = with pkgs; [ coreutils ponysay ];
             src = ./.;
             build = builtins.readFile ./example/build.nu;
             BOOPER = "bopper";
@@ -120,7 +120,7 @@
 
           # The Nushell-based derivation above but with debug mode disabled
           nushellNoDebug = pkgs.nuenv.mkDerivation {
-            name = "just-experimenting";
+            name = "pony-greeting";
             inherit system;
             packages = with pkgs; [ coreutils ponysay ];
             src = ./.;
