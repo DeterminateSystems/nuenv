@@ -105,7 +105,7 @@ if $nix.debug {
     info $"Setting (blue $numAttrs) user-supplied environment ($varString):"
 
     for attr in $drv.extraAttrs {
-      item $"(yellow $attr.key)=($attr.value)"
+      item $"(yellow $attr.key) = \"($attr.value)\""
       let-env $attr.key = $attr.value
     }
   }

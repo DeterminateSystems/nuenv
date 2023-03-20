@@ -112,11 +112,9 @@
           nushell = pkgs.nuenv.mkDerivation {
             name = "cow-says-hello";
             inherit system;
-            packages = with pkgs; [ coreutils ponysay ];
-            outputs = [ "out" "doc" ];
+            packages = with pkgs; [ hello ];
             src = ./.;
             build = builtins.readFile ./example/build.nu;
-
             BOOPER = "bopper";
           };
 
@@ -144,28 +142,14 @@
           std = pkgs.stdenv.mkDerivation {
             name = "just-experimenting";
             inherit system;
-            buildInputs = with pkgs; [ go ];
+            buildInputs = with pkgs; [ ponysay ];
             src = ./.;
-            outputs = [ "out" "doc" ];
             buildPhase = ''
-              versionFile="go-version.txt"
-              echo "Writing version info to ''${versionFile}"
-              go version > $versionFile
-              substituteInPlace $versionFile --replace "go" "golang"
-
-              helpFile="go-help.txt"
-              echo "Writing help info to ''${helpFile}"
-              go help > $helpFile
-              substituteInPlace $helpFile --replace "go" "golang"
-
-              echo "Docs!" > docs.txt
+              echo "Realising Nix derivations with Bash" | ponythink --pony caesar > happy-thought.txt
             '';
             installPhase = ''
               mkdir -p $out/share
-              cp go-*.txt $out/share
-
-              mkdir -p $doc/share
-              cp docs.txt $doc/share
+              cp happy-thought.txt $out/share
             '';
           };
 
