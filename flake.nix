@@ -23,14 +23,14 @@
         default = nuenv;
 
         nuenv = final: prev: {
-          nuenv.mkDerivation = self.lib.mkNushellDerivation final;
+          nuenv.mkDerivation = self.lib.mkNushellDerivation prev.nushell;
         };
       };
 
       lib = {
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
-        mkNushellDerivation = pkgs:
+        mkNushellDerivation = nushell:
           { name                # The name of the derivation
           , src                 # The derivation's sources
           , system              # The build system
@@ -63,7 +63,7 @@
             inherit build;
 
             # Build logic
-            builder = "${pkgs.nushell}/bin/nu";
+            builder = "${nushell}/bin/nu";
             args = [ ./nushell/builder.nu ];
 
             # When this is set, Nix writes the environment to a JSON file at
