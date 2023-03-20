@@ -36,28 +36,31 @@
           , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
           , build ? ""          # The build phase
-          , install ? ""        # The install phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
-          , test ? false        # Whether to test the Nushell builder
           }:
 
-          derivation
-            {
-              inherit build install name outputs src system test;
-              builder = "${pkgs.nushell}/bin/nu";
-              args = [ ./nushell/builder.nu ];
+          derivation {
+            # Derivation
+            inherit name outputs src system;
 
-              # When this is set, Nix writes the environment to a JSON file at
-              # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
-              # is generally cleaner than parsing environment variables as strings.
-              __structuredAttrs = true;
+            # Phases
+            inherit build;
 
-              # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-              __nu_user_env_file = ./nushell/user-env.nu;
-              __nu_packages = packages;
-              __nu_debug = debug;
-            };
+            # Build logic
+            builder = "${pkgs.nushell}/bin/nu";
+            args = [ ./nushell/builder.nu ];
+
+            # When this is set, Nix writes the environment to a JSON file at
+            # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
+            # is generally cleaner than parsing environment variables as strings.
+            __structuredAttrs = true;
+
+            # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
+            __nu_user_env_file = ./nushell/user-env.nu;
+            __nu_packages = packages;
+            __nu_debug = debug;
+          };
       };
 
       apps = forAllSystems ({ pkgs, system }: {
@@ -97,6 +100,7 @@
             outputs = [ "out" "doc" ];
             src = ./.;
             build = builtins.readFile ./example/build.nu;
+            __nu_debug = false;
           };
 
           # The Nushell-based derivation above but with debug mode disabled

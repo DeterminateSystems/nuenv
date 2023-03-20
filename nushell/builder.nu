@@ -134,9 +134,9 @@ def runPhase [
   }
 }
 
+# The available phases
 for phase in [
   "build"
-  "install"
 ] { runPhase $phase }
 
 ## Run if realisation succeeds
