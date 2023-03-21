@@ -3,9 +3,13 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable"; # Provides Nushell v0.76.0
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, rust-overlay }:
     let
       supportedSystems = [
         "x86_64-linux" # 64-bit Intel/AMD Linux
@@ -16,7 +20,13 @@
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.nuenv ]; # Supply nixpkgs.nuenv.mkDerivation
+          overlays = [
+            self.overlays.nuenv # Supply nixpkgs.nuenv.mkDerivation
+            rust-overlay.overlays.default
+            (final: prev: {
+              rustToolchain = prev.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+            })
+          ];
         };
         inherit system;
       });
@@ -51,6 +61,10 @@
           packages = with pkgs; [ cachix direnv nushell ];
         };
 
+        wasm = pkgs.mkShell {
+          packages = with pkgs; [ nushell rustToolchain wasmtime ];
+        };
+
         # A dev environment with Nuenv's helper functions available
         nuenv = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
@@ -70,6 +84,18 @@
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
           MESSAGE = "Hello from Nix + Bash";
+        };
+
+        wasm = pkgs.nuenv.mkDerivation {
+          name = "rust-wasm";
+          packages = with pkgs; [ rustToolchain ];
+          src = ./rust-wasm-example;
+          build = ''
+            let bin = $"($env.out)/bin"
+            mkdir $bin
+            cargo build --target wasm32-wasi --release
+            cp target/wasm32-wasi/release/rust-wasm-example.wasm $bin
+          '';
         };
 
         # A non-overlay version

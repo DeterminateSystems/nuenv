@@ -1,0 +1,4 @@
+[toolchain]
+channel = "1.67.1"
+targets = ["wasm32-wasi"]
+components = ["cargo"]    # We'll keep it minimal to cut down on build time
