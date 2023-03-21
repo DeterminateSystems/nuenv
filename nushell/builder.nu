@@ -45,7 +45,7 @@ let initialPkgs = $attrs.__nu_packages
 let nushell = {
   version: (version).version, # Nushell version
   pkg: (get-pkg-root $attrs.builder), # Nushell package path
-  userEnvFile: $attrs.__nu_user_env_file # Functions that users can apply in realisation phases
+  userEnvFile: $attrs.envFile # Functions that users can apply in realisation phases
 }
 
 # Derivation attributes

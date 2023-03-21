@@ -3,14 +3,15 @@ nushell:
 # nixpkgs.system (from overlay)
 sys:
 
-{ name                # The name of the derivation
-, src                 # The derivation's sources
-, packages ? [ ]      # Packages provided to the realisation process
-, system ? sys        # The build system
-, build ? ""          # The build phase
-, debug ? true        # Run in debug mode
-, outputs ? [ "out" ] # Outputs to provide
-, ...                 # Catch user-supplied env vars
+{ name                              # The name of the derivation
+, src                               # The derivation's sources
+, packages ? [ ]                    # Packages provided to the realisation process
+, system ? sys                      # The build system
+, build ? ""                        # The build phase
+, debug ? true                      # Run in debug mode
+, outputs ? [ "out" ]               # Outputs to provide
+, envFile ? ../nushell/user-env.nu  # Nushell environment passed to build phases
+, ...                               # Catch user-supplied env vars
 }@attrs:
 
 let
@@ -18,6 +19,7 @@ let
   reservedAttrs = [
     "build"
     "debug"
+    "envFile"
     "name"
     "outputs"
     "packages"
@@ -26,14 +28,13 @@ let
     "__nu_debug"
     "__nu_extra_attrs"
     "__nu_packages"
-    "__nu_user_env_file"
   ];
 
   extraAttrs = removeAttrs attrs reservedAttrs;
 in
 derivation {
   # Derivation
-  inherit name outputs src system;
+  inherit envFile name outputs src system;
 
   # Phases
   inherit build;
@@ -51,5 +52,4 @@ derivation {
   __nu_debug = debug;
   __nu_extra_attrs = extraAttrs;
   __nu_packages = packages;
-  __nu_user_env_file = ../nushell/user-env.nu;
 }
