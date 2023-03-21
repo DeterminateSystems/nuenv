@@ -32,7 +32,7 @@ let
 
   extraAttrs = removeAttrs attrs reservedAttrs;
 in
-derivation {
+derivation ({
   # Derivation
   inherit envFile name outputs src system;
 
@@ -52,4 +52,4 @@ derivation {
   __nu_debug = debug;
   __nu_extra_attrs = extraAttrs;
   __nu_packages = packages;
-}
+} // extraAttrs)

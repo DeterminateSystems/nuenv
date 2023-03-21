@@ -27,6 +27,10 @@ def get-pkg-name [storeRoot: path, path: path] {
   $path | parse $"($storeRoot)/{__hash}-{pkg}" | select pkg | get pkg.0
 }
 
+def attr-is-set [obj: record, key: string] {
+  not ($obj | transpose name value | where name == $key | is-empty)
+}
+
 ## Parse the build environment
 
 # This branching is a necessary workaround for a bug in the Nix CLI fixed in
@@ -85,16 +89,15 @@ if $nix.debug {
 ## Set up the environment
 if $nix.debug { banner "SETUP" }
 
-# Add packages to PATH
-# Total number of packages added to the env by the user
-let numPackages = ($drv.initialPackages | length)
-let pkgString = $"package(if $numPackages > 1 or $numPackages == 0 { "s" })"
-if $nix.debug {
-  info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
+# Add general packages to PATH
+if not ($drv.initialPackages | is-empty) {
+  let numPackages = ($drv.initialPackages | length)
+
+  if $nix.debug { info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:" }
 
   for pkg in $drv.initialPackages {
     let name = get-pkg-name $nix.store $pkg
-    item $name
+    if $nix.debug { item $name }
   }
 }
 
