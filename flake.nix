@@ -54,7 +54,7 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ nushell ];
+          packages = with pkgs; [ nushell self.packages.${system}.run-wasm ];
         };
 
         ci = pkgs.mkShell {
@@ -97,6 +97,10 @@
             cp target/wasm32-wasi/release/rust-wasm-example.wasm $bin
           '';
         };
+
+        run-wasm = pkgs.writeScriptBin "run-wasm" ''
+          ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm
+        '';
 
         # A non-overlay version
         direct = self.lib.mkNushellDerivation pkgs.nushell system {
