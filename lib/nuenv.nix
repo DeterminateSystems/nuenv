@@ -40,7 +40,7 @@ derivation {
 
   # Build logic
   builder = "${nushell}/bin/nu";
-  args = [ ./nushell/builder.nu ];
+  args = [ ../nushell/builder.nu ];
 
   # When this is set, Nix writes the environment to a JSON file at
   # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
@@ -51,5 +51,5 @@ derivation {
   __nu_debug = debug;
   __nu_extra_attrs = extraAttrs;
   __nu_packages = packages;
-  __nu_user_env_file = ./nushell/user-env.nu;
+  __nu_user_env_file = ../nushell/user-env.nu;
 }
