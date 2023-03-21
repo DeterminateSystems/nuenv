@@ -26,29 +26,30 @@ nix build --print-build-logs
 You should see build output like this:
 
 ```shell
-cow-says-hello> >>> INFO
-cow-says-hello> > Building cow-says-hello
-cow-says-hello> > Running Nushell 0.76.0
-cow-says-hello> > Derivation info:
-cow-says-hello> ╭─────────┬────────────────╮
-cow-says-hello> │ name    │ cow-says-hello │
-cow-says-hello> │ system  │ aarch64-darwin │
-cow-says-hello> │ outputs │ out            │
-cow-says-hello> ╰─────────┴────────────────╯
-cow-says-hello> >>> SETUP
-cow-says-hello> > Adding 2 packages to PATH:
-cow-says-hello> > Copying sources
-cow-says-hello> >>> REALISATION
-cow-says-hello> > Running build phase
-cow-says-hello> + Creating output directory at /nix/store/6gfxzzh342l0i38gswdc87pvg9n344bj-cow-says-hello
-cow-says-hello> + Writing dreamy equine thoughts to hello.txt
-cow-says-hello> + Copying hello.txt to /nix/store/6gfxzzh342l0i38gswdc87pvg9n344bj-cow-says-hello
-cow-says-hello> + Done!
-cow-says-hello> >>> DONE!
-cow-says-hello> > out output written to /nix/store/6gfxzzh342l0i38gswdc87pvg9n344bj-cow-says-hello
+hello-nix-nushell> >>> INFO
+hello-nix-nushell> > Realising the hello-nix-nushell derivation for aarch64-darwin
+hello-nix-nushell> > Using Nushell 0.77.0
+hello-nix-nushell> > Declared build outputs:
+hello-nix-nushell> + out
+hello-nix-nushell> >>> SETUP
+hello-nix-nushell> > Adding 1 package to PATH:
+hello-nix-nushell> + hello-2.12.1
+hello-nix-nushell> > Setting PATH
+hello-nix-nushell> > Setting 1 user-supplied environment variable:
+hello-nix-nushell> + MESSAGE = "Hello from Nix + Bash"
+hello-nix-nushell> > Copying sources
+hello-nix-nushell> > Creating output directories
+hello-nix-nushell> >>> REALISATION
+hello-nix-nushell> > Running build phase
+hello-nix-nushell> + Running hello version 2.12.1
+hello-nix-nushell> + Creating output directory at /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share
+hello-nix-nushell> + Writing hello message to /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share/hello.txt
+hello-nix-nushell> + Substituting Bash for Nushell in /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share/hello.txt
+hello-nix-nushell> >>> DONE!
+hello-nix-nushell> > out output written to /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell
 ```
 
-This derivation does something very straightforward: it provides a message to [ponysay] and saves the result in a text file called `happy-thought.txt` under the `share` directory.
+This derivation does something very straightforward: it provides a message to GNU's [hello] tool and saves the result in a text file called `hello.txt` under the `share` directory.
 
 ```shell
 cat ./result/share/hello.txt
@@ -84,11 +85,12 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
         inherit system;
         # This script is Nushell, not Bash
         build = ''
-          "Hello" | save hello.txt
+          hello --greeting $"($env.MESSAGE)" | save hello.txt
           let out = $"($env.out)/share"
           mkdir $out
           cp hello.txt $out
         '';
+        MESSAGE = "My custom Nuenv derivation!";
       };
     });
   };
@@ -98,11 +100,11 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
 [bash]: https://gnu.org/software/bash
 [blog]: https://determinate.systems/posts
 [derivation]: https://zero-to-nix.com/concepts/derivations
-[flake]: https://zero-to-nix.com/concepts/flakes
 [dni]: https://github.com/DeterminateSystems/nix-installer
+[flake]: https://zero-to-nix.com/concepts/flakes
+[hello]: https://gnu.org/software/hello
 [nix]: https://nixos.org
 [nushell]: https://nushell.sh
-[ponysay]: https://github.com/erkin/ponysay
 [post]: https://determinate.systems/posts/nuenv
 [realise]: https://zero-to-nix.com/concepts/realisation
 [stdenv]: https://ryantm.github.io/nixpkgs/stdenv/stdenv

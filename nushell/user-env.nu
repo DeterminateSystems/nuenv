@@ -34,7 +34,7 @@ def err [
 def ensureFileExists [
   file: path # The path to check for existence
 ] {
-  if not ($file | path exists) {
+  if not (($file | path exists) and true) {
     let relativeFilePath = relativePath $file
     err $"File not found at: (ansi red)($relativeFilePath)(ansi reset)"
     exit 1

@@ -14,7 +14,10 @@
         "aarch64-darwin"
       ];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.nuenv ]; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ self.overlays.nuenv ];
+        };
         inherit system;
       });
     in
@@ -23,18 +26,30 @@
         default = nuenv;
 
         nuenv = final: prev: {
-          nuenv.mkDerivation = self.lib.mkNushellDerivation prev.nushell;
+          nuenv = {
+            mkDerivation = self.lib.mkNushellDerivation
+              # Provide Nushell package
+              prev.nushell
+              # Provide default system
+              prev.system;
+          };
         };
       };
 
       lib = {
         # A derivation wrapper that calls a Nushell builder rather than the standard environment's
         # Bash builder.
-        mkNushellDerivation = nushell:
+        mkNushellDerivation =
+          # nixpkgs.nushell (from overlay)
+          nushell:
+
+          # nixpkgs.system (from overlay)
+          sys:
+
           { name                # The name of the derivation
           , src                 # The derivation's sources
-          , system              # The build system
           , packages ? [ ]      # Packages provided to the realisation process
+          , system ? sys        # The build system
           , build ? ""          # The build phase
           , debug ? true        # Run in debug mode
           , outputs ? [ "out" ] # Outputs to provide
@@ -51,6 +66,10 @@
               "packages"
               "src"
               "system"
+              "__nu_debug"
+              "__nu_extra_attrs"
+              "__nu_packages"
+              "__nu_user_env_file"
             ];
 
             extraAttrs = removeAttrs attrs reservedAttrs;
@@ -72,10 +91,10 @@
             __structuredAttrs = true;
 
             # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-            __nu_user_env_file = ./nushell/user-env.nu;
-            __nu_packages = packages;
             __nu_debug = debug;
             __nu_extra_attrs = extraAttrs;
+            __nu_packages = packages;
+            __nu_user_env_file = ./nushell/user-env.nu;
           };
       };
 
@@ -110,48 +129,73 @@
 
           # An example Nushell-based derivation
           hello = pkgs.nuenv.mkDerivation {
-            name = "pony-greeting";
-            inherit system;
+            name = "hello-nix-nushell";
             packages = [ pkgs.hello ];
             src = ./.;
             build = builtins.readFile ./example/hello.nu;
             MESSAGE = "Hello from Nix + Bash";
           };
 
+          # A non-overlay version
+          direct = self.lib.mkNushellDerivation pkgs.nushell system {
+            name = "no-overlay";
+            src = ./.;
+            build = ''
+              (version).version | save nushell-version.txt
+              cp nushell-version.txt $env.out
+            '';
+          };
+
           # The Nushell-based derivation above but with debug mode disabled
           helloNoDebug = pkgs.nuenv.mkDerivation {
-            name = "pony-greeting";
-            inherit system;
-            packages = [ pkgs.hello ];
+            name = "hello-nix-nushell";
+            packages = with pkgs; [ hello ];
             src = ./.;
             build = builtins.readFile ./example/hello.nu;
             debug = false;
             MESSAGE = "Hello from Nix + Bash";
           };
 
-          # The same derivation above but using the stdenv
-          stdenv = pkgs.stdenv.mkDerivation {
-            name = "just-experimenting";
-            inherit system;
-            buildInputs = with pkgs; [ ponysay ];
-            src = ./.;
-            buildPhase = ''
-              echo "Realising Nix derivations with Bash" | ponysay --pony caesar > happy-thought.txt
-            '';
-            installPhase = ''
-              mkdir -p $out/share
-              cp happy-thought.txt $out/share
+          # Show that Nuenv works when drawing sources from GitHub
+          githubSrc = pkgs.nuenv.mkDerivation {
+            name = "advanced-nix-nushell";
+            src = pkgs.fetchFromGitHub {
+              owner = "DeterminateSystems";
+              repo = "nuenv";
+              rev = "c8adf22d9cdc61d4777ad4b9d193e9b22547419e";
+              sha256 = "sha256-fu4WTFHlceasWpi6zF0nlent4KSmPAdsiKTrGixDEiI=";
+            };
+            build = ''
+              let share = $"($env.out)/share"
+              mkdir $share
+              cp README.md $share
             '';
           };
 
-          # Derivation that relies on the Nushell derivation
+          # The same derivation above but using the stdenv
+          stdenv = pkgs.stdenv.mkDerivation {
+            name = "just-experimenting";
+            buildInputs = with pkgs; [ hello ];
+            src = ./.;
+            buildPhase = ''
+              hello --greeting "''${MESSAGE}" > hello.txt
+              substituteInPlace hello.txt --replace "Bash" "Nushell"
+            '';
+            installPhase = ''
+              mkdir -p $out/share
+              cp hello.txt $out/share
+            '';
+            MESSAGE = "Hello from Nix + Bash";
+          };
+
+          # Simple that relies on the Nushell derivation
           other = pkgs.stdenv.mkDerivation {
             name = "other";
             src = ./.;
             installPhase = ''
               mkdir -p $out/share
 
-              cp ${self.packages.${system}.default}/share/happy-thought.txt $out/share/happy-though-about-nushell.txt
+              cp ${self.packages.${system}.default}/share/hello.txt $out/share/copied.txt
             '';
           };
         });

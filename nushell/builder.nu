@@ -111,16 +111,15 @@ let-env PATH = $packagesPath
 
 # Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
 # list by removing reserved attributes (name, system, build, src, system, etc.).
-if $nix.debug {
-  let numAttrs = ($drv.extraAttrs | length)
-  if not ($numAttrs == 0) {
-    info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):"
-  }
-}
+let numAttrs = ($drv.extraAttrs | length)
 
-for attr in $drv.extraAttrs {
-  if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
-  let-env $attr.key = $attr.value
+if not ($numAttrs == 0) {
+  if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
+
+  for attr in $drv.extraAttrs {
+    if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
+    let-env $attr.key = $attr.value
+  }
 }
 
 # Copy sources
@@ -149,7 +148,6 @@ def runPhase [
 
   if not ($phase | is-empty) {
     if $nix.debug { info $"Running (blue $name) phase" }
-
       # We need to source the envFile prior to each phase so that custom Nushell
       # commands are registered. Right now there's a single env file but in
       # principle there could be per-phase scripts.
