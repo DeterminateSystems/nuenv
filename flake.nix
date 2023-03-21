@@ -86,17 +86,32 @@
           MESSAGE = "Hello from Nix + Bash";
         };
 
-        wasm = pkgs.nuenv.mkDerivation {
-          name = "rust-wasm";
-          packages = with pkgs; [ rustToolchain ];
-          src = ./rust-wasm-example;
-          build = ''
-            let bin = $"($env.out)/bin"
-            mkdir $bin
-            cargo build --target wasm32-wasi --release
-            cp target/wasm32-wasi/release/rust-wasm-example.wasm $bin
-          '';
-        };
+        wasm =
+          let
+            # An example of building a wrapper around Nuenv
+            buildRustWasm =
+              { name
+              , src
+              , target ? "wasm32-wasi"
+              , bin ? name
+              , rust
+              }: pkgs.nuenv.mkDerivation {
+                inherit name src;
+                packages = [ rust ];
+                build = ''
+                  let bin = $"($env.out)/bin"
+                  mkdir $bin
+                  cargo build --target ${target} --release
+                  cp target/wasm32-wasi/release/${bin}.wasm $bin
+                '';
+              };
+          in
+          buildRustWasm {
+            name = "nix-nushell-rust-wasm";
+            src = ./rust-wasm-example;
+            bin = "rust-wasm-example";
+            rust = pkgs.rustToolchain;
+          };
 
         run-wasm = pkgs.writeScriptBin "run-wasm" ''
           ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm
