@@ -115,12 +115,12 @@ if $nix.debug {
   let numAttrs = ($drv.extraAttrs | length)
   if not ($numAttrs == 0) {
     info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):"
-
-    for attr in $drv.extraAttrs {
-      item $"(yellow $attr.key) = \"($attr.value)\""
-      let-env $attr.key = $attr.value
-    }
   }
+}
+
+for attr in $drv.extraAttrs {
+  if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
+  let-env $attr.key = $attr.value
 }
 
 # Copy sources

@@ -48,7 +48,7 @@ cow-says-hello> >>> DONE!
 cow-says-hello> > out output written to /nix/store/6gfxzzh342l0i38gswdc87pvg9n344bj-cow-says-hello
 ```
 
-This derivation does something very straightforward: it provides a message to [ponythink] and saves the result in a text file called `happy-thought.txt` under the `share` directory.
+This derivation does something very straightforward: it provides a message to [ponysay] and saves the result in a text file called `happy-thought.txt` under the `share` directory.
 
 ```shell
 cat ./result/share/hello.txt
@@ -102,7 +102,7 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
 [dni]: https://github.com/DeterminateSystems/nix-installer
 [nix]: https://nixos.org
 [nushell]: https://nushell.sh
-[ponythink]: https://github.com/erkin/ponysay
+[ponysay]: https://github.com/erkin/ponysay
 [post]: https://determinate.systems/posts/nuenv
 [realise]: https://zero-to-nix.com/concepts/realisation
 [stdenv]: https://ryantm.github.io/nixpkgs/stdenv/stdenv

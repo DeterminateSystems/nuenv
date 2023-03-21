@@ -106,47 +106,37 @@
 
       packages = forAllSystems
         ({ pkgs, system }: rec {
-          default = nushell;
+          default = hello;
 
           # An example Nushell-based derivation
-          nushell = pkgs.nuenv.mkDerivation {
+          hello = pkgs.nuenv.mkDerivation {
             name = "pony-greeting";
             inherit system;
-            packages = with pkgs; [ coreutils ponysay ];
+            packages = [ pkgs.hello ];
             src = ./.;
-            build = builtins.readFile ./example/build.nu;
-            BOOPER = "bopper";
+            build = builtins.readFile ./example/hello.nu;
+            MESSAGE = "Hello from Nix + Bash";
           };
 
           # The Nushell-based derivation above but with debug mode disabled
-          nushellNoDebug = pkgs.nuenv.mkDerivation {
+          helloNoDebug = pkgs.nuenv.mkDerivation {
             name = "pony-greeting";
             inherit system;
-            packages = with pkgs; [ coreutils ponysay ];
+            packages = [ pkgs.hello ];
             src = ./.;
-            build = builtins.readFile ./example/build.nu;
+            build = builtins.readFile ./example/hello.nu;
             debug = false;
-            BOOPER = "bopper";
-          };
-
-          test = pkgs.nuenv.mkDerivation {
-            name = "test-nushell-logic";
-            inherit system;
-            packages = [ ];
-            src = ./.;
-            build = "";
-            debug = true;
-            test = true;
+            MESSAGE = "Hello from Nix + Bash";
           };
 
           # The same derivation above but using the stdenv
-          std = pkgs.stdenv.mkDerivation {
+          stdenv = pkgs.stdenv.mkDerivation {
             name = "just-experimenting";
             inherit system;
             buildInputs = with pkgs; [ ponysay ];
             src = ./.;
             buildPhase = ''
-              echo "Realising Nix derivations with Bash" | ponythink --pony caesar > happy-thought.txt
+              echo "Realising Nix derivations with Bash" | ponysay --pony caesar > happy-thought.txt
             '';
             installPhase = ''
               mkdir -p $out/share
