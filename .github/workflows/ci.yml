@@ -1,4 +1,4 @@
-name: Realise a derivation using Nuenv
+name: Nuenv
 
 on:
   pull_request:
