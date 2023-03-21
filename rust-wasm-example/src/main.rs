@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    println!("Welcome from Wasm built with Nix, Rust, and Nushell!");
 }
