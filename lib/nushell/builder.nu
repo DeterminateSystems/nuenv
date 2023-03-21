@@ -151,7 +151,11 @@ def runPhase [
       # We need to source the envFile prior to each phase so that custom Nushell
       # commands are registered. Right now there's a single env file but in
       # principle there could be per-phase scripts.
-      nu --config $nushell.userEnvFile --commands $phase
+      do --capture-errors {
+        nu --env-config $nushell.userEnvFile --commands $phase
+
+        exit $env.LAST_EXIT_CODE
+      }
   } else {
     if $nix.debug { info $"Skipping empty (blue $name) phase" }
   }
