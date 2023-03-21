@@ -44,10 +44,30 @@ jobs:
           nix build --print-build-logs
           cat result/share/hello.txt
 
+      - name: Build Nuenv derivation with no debug output
+        run: |
+          nix build --print-build-logs .#helloNoDebug
+          cat result/share/hello.txt
+
+      - name: Build Nuenv derivation directly (not from overlay)
+        run: |
+          nix build --print-build-logs .#direct
+          cat result/share/nushell-version.txt
+
       - name: Build stdenv derivation that depends on Nuenv derivation
         run: |
           nix build --print-build-logs .#other
           cat result/share/copied.txt
+
+      - name: Build Nuenv derivation that pulls sources from GitHub
+        run: |
+          nix build --print-build-logs .#githubSrc
+          cat result/share/README.md
+
+      - name: Build stdenv derivation that mimics Nuenv derivation
+        run: |
+          nix build --print-build-logs .#stdenv
+          cat result/share/hello.txt
 
       - name: Cache development environment
         run: |
