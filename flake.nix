@@ -1,5 +1,5 @@
 {
-  description = "nuenv: a Nushell environment for Nix";
+  description = "Nuenv: a Nushell environment for Nix";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable"; # Provides Nushell v0.76.0
@@ -8,15 +8,15 @@
   outputs = { self, nixpkgs }:
     let
       supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
+        "x86_64-linux" # 64-bit Intel/AMD Linux
+        "aarch64-linux" # 64-bit ARM Linux
+        "x86_64-darwin" # 64-bit Intel macOS
+        "aarch64-darwin" # 64-bit ARM macOS
       ];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.nuenv ];
+          overlays = [ self.overlays.nuenv ]; # Supply nixpkgs.nuenv.mkDerivation
         };
         inherit system;
       });
@@ -32,6 +32,8 @@
               prev.nushell
               # Provide default system
               prev.system;
+
+            # TODO: mkShell
           };
         };
       };

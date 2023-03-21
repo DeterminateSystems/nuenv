@@ -42,12 +42,12 @@ jobs:
       - name: Build Nuenv derivation
         run: |
           nix build --print-build-logs
-          cat result/share/happy-thought.txt
+          cat result/share/hello.txt
 
       - name: Build stdenv derivation that depends on Nuenv derivation
         run: |
           nix build --print-build-logs .#other
-          cat result/share/happy-though-about-nushell.txt
+          cat result/share/copied.txt
 
       - name: Cache development environment
         run: |
