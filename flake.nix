@@ -136,6 +136,13 @@
             cp ${self.packages.${system}.hello}/share/hello.txt $out/share/copied.txt
           '';
         };
+
+        # An Nushell-based derivation that errors
+        error = pkgs.nuenv.mkDerivation {
+          name = "throws-nushell-error";
+          src = ./.;
+          build = builtins.readFile ./example/error.nu;
+        };
       });
     };
 }

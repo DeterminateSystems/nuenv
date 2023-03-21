@@ -154,7 +154,11 @@ def runPhase [
       do --capture-errors {
         nu --env-config $nushell.userEnvFile --commands $phase
 
-        exit $env.LAST_EXIT_CODE
+        let code = $env.LAST_EXIT_CODE
+
+        if $code != 0 {
+          exit --now $code
+        }
       }
   } else {
     if $nix.debug { info $"Skipping empty (blue $name) phase" }
