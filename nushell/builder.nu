@@ -15,8 +15,13 @@ def item [msg: string] { $"(purple "+") ($msg)"}
 def plural [n: int] { if $n > 1 { "s" } else { "" } }
 
 # Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
-def env-to-bool [var: string] {
+def string-to-bool [var: string] {
   ($var | into int) == 1
+}
+
+def env-is-set [var: string] {
+  let val = ($env | transpose name value | where name == $var)
+  not ($val | is-empty)
 }
 
 def get-pkg-root [path: path] {
@@ -25,7 +30,14 @@ def get-pkg-root [path: path] {
 
 ## Parse the build environment
 
-let attrsJsonFile = $env.NIX_ATTRS_JSON_FILE # Created by __structuredAttrs = true
+# This branching is a necessary workaround for a bug in the Nix CLI fixed in
+# https://github.com/NixOS/nix/pull/8053
+let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
+  $env.NIX_ATTRS_JSON_FILE
+} else {
+  $"($env.NIX_BUILD_TOP)/.attrs.json"
+}
+
 let attrs = open $attrsJsonFile
 let initialPkgs = $attrs.__nu_packages
 
@@ -57,7 +69,7 @@ let drv = {
 let nix = {
   sandbox: $env.NIX_BUILD_TOP, # Sandbox directory
   store: $env.NIX_STORE, # Nix store root
-  debug: (env-to-bool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
+  debug: (string-to-bool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
 }
 
 ## Provide info about the current derivation
