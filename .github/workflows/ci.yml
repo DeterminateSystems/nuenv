@@ -6,9 +6,6 @@ on:
     branches:
       - main
 
-env:
-  REPO: ${{ github.event.repository.name }}
-
 jobs:
   # Build the Docker image using Nix
   build:
@@ -80,8 +77,8 @@ jobs:
 
       - name: Cache development environment
         run: |
-          nix develop ".#ci" --profile ${{ env.REPO }}
-          cachix push ${{ secrets.CACHIX_CACHE }} ${{ env.REPO }}
+          nix develop ".#ci" --profile nuenv-ci-profile
+          cachix push ${{ secrets.CACHIX_CACHE }} nuenv-ci-profile
 
       - name: Cache build artifacts
         run: |
