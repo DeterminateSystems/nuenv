@@ -54,7 +54,7 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ nushell self.packages.${system}.run-wasm ];
+          packages = with pkgs; [ nushell self.packages.${system}.hello-wasm ];
         };
 
         ci = pkgs.mkShell {
@@ -113,8 +113,8 @@
             rust = pkgs.rustToolchain;
           };
 
-        run-wasm = pkgs.writeScriptBin "run-wasm" ''
-          ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm
+        hello-wasm = pkgs.writeScriptBin "hello-wasm" ''
+          ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm "''${@}"
         '';
 
         # A non-overlay version
