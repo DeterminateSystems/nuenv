@@ -69,7 +69,7 @@
         nuenv = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
           shellHook = ''
-            nu --config ./nushell/user-env.nu
+            nu --config ./nuenv/user-env.nu
           '';
         };
       });
@@ -95,13 +95,17 @@
               , target ? "wasm32-wasi"
               , bin ? name
               , rust
+              , debug ? false
               }: pkgs.nuenv.mkDerivation {
-                inherit name src;
+                inherit debug name src;
                 packages = [ rust ];
                 build = ''
                   let bin = $"($env.out)/bin"
+                  log $"Creating bin output directory at ($bin)"
                   mkdir $bin
+                  log $"Building with (cargo --version)"
                   cargo build --target ${target} --release
+                  log $"Copying Wasm binary to ($bin)"
                   cp target/wasm32-wasi/release/${bin}.wasm $bin
                 '';
               };
@@ -111,6 +115,7 @@
             src = ./rust-wasm-example;
             bin = "rust-wasm-example";
             rust = pkgs.rustToolchain;
+            debug = true;
           };
 
         hello-wasm = pkgs.writeScriptBin "hello-wasm" ''

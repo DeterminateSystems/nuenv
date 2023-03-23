@@ -1,3 +1,6 @@
+# The Nuenv build environment
+
+# nixpkgs.nushell (from overlay)
 nushell:
 
 # nixpkgs.system (from overlay)
@@ -10,7 +13,7 @@ sys:
 , build ? ""                        # The build phase
 , debug ? true                      # Run in debug mode
 , outputs ? [ "out" ]               # Outputs to provide
-, envFile ? ../nushell/user-env.nu  # Nushell environment passed to build phases
+, envFile ? ../nuenv/user-env.nu  # Nushell environment passed to build phases
 , ...                               # Catch user-supplied env vars
 }@attrs:
 
@@ -41,7 +44,7 @@ derivation ({
 
   # Build logic
   builder = "${nushell}/bin/nu";
-  args = [ ../nushell/builder.nu ];
+  args = [ ../nuenv/builder.nu ];
 
   # When this is set, Nix writes the environment to a JSON file at
   # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
