@@ -47,7 +47,11 @@ jobs:
       - name: Build Rust + Wasm example using Nuenv
         run: |
           nix build --print-build-logs .#wasm
-          nix develop .#wasm --command wasmtime ./result/bin/rust-wasm-example.wasm
+          nix develop .#wasm --command wasmtime ./result/bin/rust-wasm-example.wasm "Nix superstar"
+
+      - name: Run hello-wasm program
+        run: |
+          nix run .#hello-wasm -- "Nix superstar"
 
       - name: Build Nuenv derivation with no debug output
         run: |
