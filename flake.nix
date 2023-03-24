@@ -86,7 +86,6 @@
         default = hello;
 
         auto = pkgs.nuenv.mkDerivation {
-          name = "auto";
           src = ./hello-rs;
           rust = {
             toolchain = pkgs.rustToolchain;

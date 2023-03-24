@@ -4,7 +4,7 @@
     nushell: # nixpkgs.nushell (from overlay)
     sys: # nixpkgs.system (from overlay)
 
-    { name                            # The name of the derivation
+    { name ? "my-pkg"                 # The name of the derivation
     , src                             # The derivation's sources
     , packages ? [ ]                  # Packages provided to the realisation process
     , system ? sys                    # The build system

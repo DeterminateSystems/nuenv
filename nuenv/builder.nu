@@ -34,6 +34,10 @@ def get-pkg-name [storeRoot: path, path: path] {
   $path | parse $"($storeRoot)/{__hash}-{pkg}" | select pkg | get pkg.0
 }
 
+def get-pkg-bin [storeRoot: path, path: path] {
+  $path | parse $"($storeRoot)/{__pkg}/bin/{tool}" | get tool.0
+}
+
 def attr-is-set [obj: record, key: string] {
   not ($obj | transpose name value | where name == $key | is-empty)
 }
@@ -170,9 +174,11 @@ if "rust" in $drv.rawAttrs {
     let rustTools = ls $"($toolchain)/bin"
     info "Rust tools available in the toolchain:"
     for tool in $rustTools {
-      item ($tool.name | parse $"($nix.store)/{_pkg}/bin/{tool}" | get tool.0)
+      item (get-pkg-bin $nix.store $tool.name)
     }
   }
+
+  let target = ($rust | get -i target | default $drv.system)
 
   let extraPkgs = ($rust | get -i extras | default [])
   let allRustPkgs = ($drv.packages | append $toolchain | append $extraPkgs)
@@ -181,13 +187,11 @@ if "rust" in $drv.rawAttrs {
   let name = (open ./Cargo.toml | get package.name)
 
   let cargoVersion = (cargo --version | parse "cargo {v} {__rest}" | get v.0)
-
   info $"Building ($name) with cargo (blue $cargoVersion)"
 
   cargo build --release
 
   mkdir $"($env.out)/bin"
-
   cp $"target/release/($name)" $"($env.out)/bin/($name)"
 } else {
   # Set PATH for package discovery
