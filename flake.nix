@@ -43,13 +43,21 @@
               # Provide default system
               prev.system;
 
+            mkScript = self.lib.mkNushellScript
+              # Provide Nushell package
+              prev.nushell
+              # Provide helper function
+              prev.writeTextFile;
+
             # TODO: mkShell
           };
         };
       };
 
       lib = {
-        mkNushellDerivation = import ./lib/nuenv.nix;
+        inherit (import ./lib/nuenv.nix)
+          mkNushellDerivation
+          mkNushellScript;
       };
 
       devShells = forAllSystems ({ pkgs, system }: {
@@ -76,6 +84,13 @@
 
       packages = forAllSystems ({ pkgs, system }: rec {
         default = hello;
+
+        run-me = pkgs.nuenv.mkScript {
+          name = "run-me";
+          script = ''
+            $"Hello ({thing: world}.thing)"
+          '';
+        };
 
         # An example Nushell-based derivation
         hello = pkgs.nuenv.mkDerivation {
