@@ -1,12 +1,15 @@
 ## Functions that can be used in derivation phases
 
-# Get the relative path of <path>. If <path> is in the temporary build directory, this returns
-# /($env.NIX_BUILD_TOP)/<__dir>/<path>. If <path> is in the Nix store, this returns
-# /($env.NIX_STORE)/<__pkg>/<path>. The default value for $env.NIX_BUILD_TOP is /private/tmp while
-# the default for $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
+# Get the relative path of <path> with respect to either the Nix store root or the build directory
+# root.
 def relativePath [
   path: path # The path to extract
 ] {
+  # If <path> is in the temporary build directory, this returns
+  # /($env.NIX_BUILD_TOP)/<__dir>/<path>. If <path> is in the Nix store, this returns
+  # /($env.NIX_STORE)/<__pkg>/<path>. The default value for $env.NIX_BUILD_TOP is /private/tmp while
+  # the default for $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
+
   if ($path | str starts-with $env.NIX_BUILD_TOP) {
     $path | parse $"($env.NIX_BUILD_TOP)/{path}" | select path | get path.0
   } else if ($path | str starts-with $env.NIX_STORE) {
@@ -70,8 +73,9 @@ def substituteInPlace [
 }
 
 # Display Nuenv-specific commands.
-def nuenv-commands [] {
+def nuenvCommands [] {
   help commands
   | where command_type == "custom"
-  | where not name in ["create_left_prompt" "create_right_prompt"]
+  | where not name in ["nuenvCommands"]
+  | select name usage
 }

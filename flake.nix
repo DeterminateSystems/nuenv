@@ -100,7 +100,7 @@
         };
 
         nuenv-commands = pkgs.writeScriptBin "nuenv-commands" ''
-          ${pkgs.nushell}/bin/nu --env-config ./nuenv/user-env.nu --commands "nuenv-commands"
+          ${pkgs.nushell}/bin/nu --env-config ./nuenv/user-env.nu --commands "nuenvCommands"
         '';
 
         # An example Nushell-based derivation
