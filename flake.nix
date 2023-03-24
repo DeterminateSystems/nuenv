@@ -77,7 +77,7 @@
         nuenv = pkgs.mkShell {
           packages = with pkgs; [ nushell ];
           shellHook = ''
-            nu --config ./nuenv/user-env.nu
+            nu --config ${./nuenv/user-env.nu}
           '';
         };
       });
@@ -100,7 +100,7 @@
         };
 
         nuenv-commands = pkgs.writeScriptBin "nuenv-commands" ''
-          ${pkgs.nushell}/bin/nu --env-config ./nuenv/user-env.nu --commands "nuenvCommands"
+          ${pkgs.nushell}/bin/nu --env-config ${./nuenv/user-env.nu} --commands "nuenvCommands"
         '';
 
         # An example Nushell-based derivation
