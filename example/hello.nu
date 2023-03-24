@@ -21,18 +21,3 @@ ensureFileExists $helloOutputFile
 
 log $"Substituting \"Bash\" for \"Nushell\" in (purple $helloOutputFile)"
 substituteInPlace $helloOutputFile --replace "Bash" --with "Nushell"
-
-# Docs
-let docDir = $env.doc
-let docFile = "docs.txt"
-let docOutputFile = $"($docDir)/($docFile)"
-
-log $"Creating $doc directory at (purple $docDir)"
-mkdir $docDir
-
-log $"Writing docs to (purple $docOutputFile)"
-"Here's some usage instructions" | save $docFile
-
-cp $docFile $docDir
-
-ensureFileExists $docOutputFile

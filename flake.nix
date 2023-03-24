@@ -107,7 +107,6 @@
         hello = pkgs.nuenv.mkDerivation {
           name = "hello-nix-nushell";
           packages = [ pkgs.hello ];
-          outputs = [ "doc" "out" ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
           MESSAGE = "Hello from Nix + Bash";
@@ -117,7 +116,6 @@
         helloNoDebug = pkgs.nuenv.mkDerivation {
           name = "hello-nix-nushell";
           packages = [ pkgs.hello ];
-          outputs = [ "doc" "out" ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
           debug = false;
@@ -209,6 +207,8 @@
           name = "other";
           src = ./.;
           installPhase = ''
+            ls ${self.packages.${system}.hello}
+
             mkdir -p $out/share
 
             cp ${self.packages.${system}.hello}/share/hello.txt $out/share/copied.txt
