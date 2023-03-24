@@ -88,7 +88,14 @@
         run-me = pkgs.nuenv.mkScript {
           name = "run-me";
           script = ''
-            $"Hello ({thing: world}.thing)"
+            def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
+            def info [msg: string] { $"(color "blue" "INFO"): ($msg)" }
+            def success [msg: string] { $"(color "green" "SUCCESS"): ($msg)" }
+
+            info "Running script"
+            info "Something else is happening now"
+            info "Nearing completion"
+            success "DONE"
           '';
         };
 
