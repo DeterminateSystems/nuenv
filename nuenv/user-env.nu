@@ -19,6 +19,11 @@ def relativePath [
   }
 }
 
+# Display exit code from the last command.
+def code [] {
+  $env.LAST_EXIT_CODE
+}
+
 # Display the <msg> in a pretty way.
 def log [
   msg: string # The message to log.
