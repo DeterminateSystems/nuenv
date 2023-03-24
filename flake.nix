@@ -87,9 +87,11 @@
 
         auto = pkgs.nuenv.mkDerivation {
           name = "auto";
-          src = ./rust-wasm-example;
+          src = ./hello-rs;
           rust = {
             toolchain = pkgs.rustToolchain;
+            # I'll find a way to get rid of this later
+            extras = with pkgs; [ coreutils clang clang.bintools.bintools_bin ];
           };
         };
 

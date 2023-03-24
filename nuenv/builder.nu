@@ -38,6 +38,10 @@ def attr-is-set [obj: record, key: string] {
   not ($obj | transpose name value | where name == $key | is-empty)
 }
 
+def pkgs-path [pkgs: list] {
+  $pkgs | each { |pkg| $"($pkg)/bin" } | str collect (char esep)
+}
+
 ## Parse the build environment
 
 # This branching is a necessary workaround for a bug in the Nix CLI fixed in
@@ -116,22 +120,16 @@ if not ($drv.initialPackages | is-empty) {
 # Collect all packages into a string and set PATH
 if $nix.debug { info $"Setting (purple "PATH")" }
 
-let packagesPath = (
-  $drv.packages                  # List of strings
-  | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
-  | str collect (char esep)      # Collect into a single colon-separate string
-)
-let-env PATH = $packagesPath
-
 # Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
 # list by removing reserved attributes (name, system, build, src, system, etc.).
 let numAttrs = ($drv.extraAttrs | length)
 
 if not ($numAttrs == 0) {
-  if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
+  # TODO: move this into the non-Rust/etc path
+  #if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
 
   for attr in $drv.extraAttrs {
-    if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
+    #if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
     let-env $attr.key = $attr.value
   }
 }
@@ -165,10 +163,36 @@ if "rust" in $drv.rawAttrs {
 
   let rust = $drv.rawAttrs.rust
   ensure-set $rust "toolchain" "rust"
-  if $nix.debug { info $"Using Rust toolchain (blue (get-pkg-name $nix.store $rust.toolchain))" }
+  let toolchain = $rust.toolchain
 
-  mkdir $env.out
+  if $nix.debug {
+    info $"Using Rust toolchain package (blue (get-pkg-name $nix.store $toolchain))"
+    let rustTools = ls $"($toolchain)/bin"
+    info "Rust tools available in the toolchain:"
+    for tool in $rustTools {
+      item ($tool.name | parse $"($nix.store)/{_pkg}/bin/{tool}" | get tool.0)
+    }
+  }
+
+  let extraPkgs = ($rust | get -i extras | default [])
+  let allRustPkgs = ($drv.packages | append $toolchain | append $extraPkgs)
+  let-env PATH = (pkgs-path $allRustPkgs)
+
+  let name = (open ./Cargo.toml | get package.name)
+
+  let cargoVersion = (cargo --version | parse "cargo {v} {__rest}" | get v.0)
+
+  info $"Building ($name) with cargo (blue $cargoVersion)"
+
+  cargo build --release
+
+  mkdir $"($env.out)/bin"
+
+  cp $"target/release/($name)" $"($env.out)/bin/($name)"
 } else {
+  # Set PATH for package discovery
+  let-env PATH = (pkgs-path $drv.packages)
+
   # Run a derivation phase (skip if empty)
   def runPhase [
     name: string,

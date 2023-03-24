@@ -4,15 +4,15 @@
     nushell: # nixpkgs.nushell (from overlay)
     sys: # nixpkgs.system (from overlay)
 
-    { name                              # The name of the derivation
-    , src                               # The derivation's sources
-    , packages ? [ ]                    # Packages provided to the realisation process
-    , system ? sys                      # The build system
-    , build ? ""                        # The build phase
-    , debug ? true                      # Run in debug mode
-    , outputs ? [ "out" ]               # Outputs to provide
+    { name                            # The name of the derivation
+    , src                             # The derivation's sources
+    , packages ? [ ]                  # Packages provided to the realisation process
+    , system ? sys                    # The build system
+    , build ? ""                      # The build phase
+    , debug ? true                    # Run in debug mode
+    , outputs ? [ "out" ]             # Outputs to provide
     , envFile ? ../nuenv/user-env.nu  # Nushell environment passed to build phases
-    , ...                               # Catch user-supplied env vars
+    , ...                             # Catch user-supplied env vars
     }@attrs:
 
     let
