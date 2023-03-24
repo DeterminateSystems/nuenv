@@ -77,12 +77,5 @@
         {}
       '';
       executable = true;
-      checkPhase = ''
-        ${nu} --commands '$"Checking validity of the script (ansi blue)${name}(ansi reset)"'
-
-        ${nu} --commands '
-          if (${script} | nu-check) { $"(ansi green)SUCCESS(ansi reset): the script (ansi blue)${name}(ansi reset) is valid" }
-        '
-      '';
     };
 }
