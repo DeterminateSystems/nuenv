@@ -80,6 +80,10 @@ if $nix.debug {
   banner "INFO"
 
   info $"Realising the (blue $drv.name) derivation for (blue $drv.system)"
+
+  let numCores = ($env.NIX_BUILD_CORES | into int)
+  info $"Running on (blue $numCores) core(if ($numCores > 1) { "s" })"
+
   info $"Using Nushell (blue $nushell.version)"
 
   info "Declared build outputs:"
@@ -184,6 +188,6 @@ if $nix.debug {
   for output in ($drv.outputs) {
     let name = ($output | get key)
     let value = ($output | get value)
-    info $"(yellow $name) output written to (purple $value)"
+    item $"(yellow $name) output written to (purple $value)"
   }
 }
