@@ -10,7 +10,14 @@ def yellow [msg: string] { color "yellow" $msg }
 
 def banner [text: string] { $"(red ">>>") (green $text)" }
 def info [msg: string] { $"(blue ">") ($msg)" }
+def panic [msg: string] { $"(red "ERROR") ($msg)"; exit 1 }
 def item [msg: string] { $"(purple "+") ($msg)"}
+
+def ensure-set [obj: record, key: string, objName: string] {
+  if not $key in $obj {
+    panic $"key (blue $key) not set in (blue $objName)"
+  }
+}
 
 def plural [n: int] { if $n > 1 { "s" } else { "" } }
 
@@ -65,6 +72,7 @@ let drv = {
     | append $nushell.pkg # Add the Nushell package to the PATH
     | split row (char space)
   ),
+  rawAttrs: $attrs.__nu_extra_attrs,
   extraAttrs: ($attrs.__nu_extra_attrs | transpose key value), # Arbitrary environment variables
 }
 
@@ -151,35 +159,46 @@ if $nix.debug { banner "REALISATION" }
 
 ## Realisation phases (just build and install for now, more later)
 
-# Run a derivation phase (skip if empty)
-def runPhase [
-  name: string,
-] {
-  let phase = ($attrs | get $name)
+# Rust
+if "rust" in $drv.rawAttrs {
+  if $nix.debug { info "Building Rust project 🦀" }
 
-  if not ($phase | is-empty) {
-    if $nix.debug { info $"Running (blue $name) phase" }
-      # We need to source the envFile prior to each phase so that custom Nushell
-      # commands are registered. Right now there's a single env file but in
-      # principle there could be per-phase scripts.
-      do --capture-errors {
-        nu --env-config $nushell.userEnvFile --commands $phase
+  let rust = $drv.rawAttrs.rust
+  ensure-set $rust "toolchain" "rust"
+  if $nix.debug { info $"Using Rust toolchain (blue (get-pkg-name $nix.store $rust.toolchain))" }
 
-        let code = $env.LAST_EXIT_CODE
+  mkdir $env.out
+} else {
+  # Run a derivation phase (skip if empty)
+  def runPhase [
+    name: string,
+  ] {
+    let phase = ($attrs | get $name)
 
-        if $code != 0 {
-          exit --now $code
+    if not ($phase | is-empty) {
+      if $nix.debug { info $"Running (blue $name) phase" }
+        # We need to source the envFile prior to each phase so that custom Nushell
+        # commands are registered. Right now there's a single env file but in
+        # principle there could be per-phase scripts.
+        do --capture-errors {
+          nu --env-config $nushell.userEnvFile --commands $phase
+
+          let code = $env.LAST_EXIT_CODE
+
+          if $code != 0 {
+            exit --now $code
+          }
         }
-      }
-  } else {
-    if $nix.debug { info $"Skipping empty (blue $name) phase" }
+    } else {
+      if $nix.debug { info $"Skipping empty (blue $name) phase" }
+    }
   }
-}
 
-# The available phases
-for phase in [
-  "build"
-] { runPhase $phase }
+  # The available phases
+  for phase in [
+    "build"
+  ] { runPhase $phase }
+}
 
 ## Run if realisation succeeds
 if $nix.debug {

@@ -85,6 +85,14 @@
       packages = forAllSystems ({ pkgs, system }: rec {
         default = hello;
 
+        auto = pkgs.nuenv.mkDerivation {
+          name = "auto";
+          src = ./rust-wasm-example;
+          rust = {
+            toolchain = pkgs.rustToolchain;
+          };
+        };
+
         run-me = pkgs.nuenv.mkScript {
           name = "run-me";
           script = ''
