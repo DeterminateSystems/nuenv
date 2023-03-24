@@ -1,11 +1,8 @@
 {
   # The Nuenv build environment
   mkNushellDerivation =
-    # nixpkgs.nushell (from overlay)
-    nushell:
-
-    # nixpkgs.system (from overlay)
-    sys:
+    nushell: # nixpkgs.nushell (from overlay)
+    sys: # nixpkgs.system (from overlay)
 
     { name                              # The name of the derivation
     , src                               # The derivation's sources
@@ -58,10 +55,18 @@
       __nu_packages = packages;
     } // extraAttrs);
 
-  mkNushellScript = nushell: writeTextFile: { name, script }:
+  mkNushellScript =
+    nushell: # nixpkgs.nushell (from overlay)
+    writeTextFile: # Utility function (from overlay)
+
+    { name
+    , script
+    , bin ? name
+    }:
+
     writeTextFile {
       inherit name;
-      destination = "/bin/${name}";
+      destination = "/bin/${bin}";
       # The {} at the end is a workaround for this: https://github.com/nushell/nushell/issues/7959
       text = ''
         #!${nushell}/bin/nu
