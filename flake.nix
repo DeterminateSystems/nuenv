@@ -99,10 +99,15 @@
           '';
         };
 
+        nuenv-commands = pkgs.writeScriptBin "nuenv-commands" ''
+          ${pkgs.nushell}/bin/nu --env-config ./nuenv/user-env.nu --commands "nuenv-commands"
+        '';
+
         # An example Nushell-based derivation
         hello = pkgs.nuenv.mkDerivation {
           name = "hello-nix-nushell";
           packages = [ pkgs.hello ];
+          outputs = [ "doc" "out" ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
           MESSAGE = "Hello from Nix + Bash";

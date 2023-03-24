@@ -128,13 +128,18 @@ if not ($numAttrs == 0) {
 if $nix.debug { info "Copying sources" }
 for src in $drv.src { cp -r $src $nix.sandbox }
 
-# Create output directories and set environment variables for all outputs
-if $nix.debug { info "Creating output directories" }
+# Set environment variables for all outputs
+if $nix.debug {
+  let numOutputs = ($drv.outputs | length)
+  info $"Setting (blue $numOutputs) output environment variable(plural $numOutputs):"
+}
 for output in ($drv.outputs) {
   let name = ($output | get key)
   let value = ($output | get value)
+
+  if $nix.debug { item $"(yellow $name) = \"($value)\"" }
+
   let-env $name = $value
-  mkdir $value # Otherwise realisation fails
 }
 
 ## The realisation process
@@ -179,6 +184,6 @@ if $nix.debug {
   for output in ($drv.outputs) {
     let name = ($output | get key)
     let value = ($output | get value)
-    info $"(purple $name) output written to ($value)"
+    info $"(yellow $name) output written to (purple $value)"
   }
 }
