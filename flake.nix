@@ -113,6 +113,17 @@
           MESSAGE = "Hello from Nix + Bash";
         };
 
+        # The Nushell-based derivation above but with debug mode disabled
+        helloNoDebug = pkgs.nuenv.mkDerivation {
+          name = "hello-nix-nushell";
+          packages = [ pkgs.hello ];
+          outputs = [ "doc" "out" ];
+          src = ./.;
+          build = builtins.readFile ./example/hello.nu;
+          debug = false;
+          MESSAGE = "Hello from Nix + Bash, but no debugging this time";
+        };
+
         wasm =
           let
             # An example of building a wrapper around Nuenv
@@ -159,16 +170,6 @@
             mkdir $share
             cp nushell-version.txt $share
           '';
-        };
-
-        # The Nushell-based derivation above but with debug mode disabled
-        helloNoDebug = pkgs.nuenv.mkDerivation {
-          name = "hello-nix-nushell";
-          packages = [ pkgs.hello ];
-          src = ./.;
-          build = builtins.readFile ./example/hello.nu;
-          debug = false;
-          MESSAGE = "Hello from Nix + Bash";
         };
 
         # Show that Nuenv works when drawing sources from GitHub
