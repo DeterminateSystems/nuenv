@@ -64,15 +64,25 @@
     , bin ? name
     }:
 
+    let
+      nu = "${nushell}/bin/nu";
+    in
     writeTextFile {
       inherit name;
       destination = "/bin/${bin}";
       # The {} at the end is a workaround for this: https://github.com/nushell/nushell/issues/7959
       text = ''
-        #!${nushell}/bin/nu
+        #!${nu}
         ${script}
         {}
       '';
       executable = true;
+      checkPhase = ''
+        ${nu} --commands '$"Checking validity of the script (ansi blue)${name}(ansi reset)"'
+
+        ${nu} --commands '
+          if (${script} | nu-check) { $"(ansi green)SUCCESS(ansi reset): the script (ansi blue)${name}(ansi reset) is valid" }
+        '
+      '';
     };
 }
