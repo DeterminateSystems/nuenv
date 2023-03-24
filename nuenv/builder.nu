@@ -15,7 +15,7 @@ def item [msg: string] { $"(purple "+") ($msg)"}
 def plural [n: int] { if $n > 1 { "s" } else { "" } }
 
 # Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
-def string-to-bool [var: string] {
+def env-to-bool [var: string] {
   ($var | into int) == 1
 }
 
@@ -72,7 +72,7 @@ let drv = {
 let nix = {
   sandbox: $env.NIX_BUILD_TOP, # Sandbox directory
   store: $env.NIX_STORE, # Nix store root
-  debug: (string-to-bool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
+  debug: (env-to-bool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
 }
 
 ## Provide info about the current derivation
