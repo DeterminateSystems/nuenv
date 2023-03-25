@@ -143,6 +143,8 @@ if not ($numAttrs == 0) {
   }
 }
 
+let-env HOME = $env.TEMPDIR
+
 # Copy sources
 if $nix.debug { info "Copying sources" }
 for src in $drv.src { cp -r $src $nix.sandbox }
