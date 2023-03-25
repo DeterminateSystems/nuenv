@@ -22,3 +22,14 @@ def display-rust-tools [toolchain: string] {
     item (get-pkg-bin $tool.name)
   }
 }
+
+# Get the binary outputs for the project. By default this is a single-item list
+# of package.name but if you supply a [[bin]] list in Cargo.toml you can have
+# multiple.
+def get-bins [toml: record] {
+  if "bin" in $toml {
+    $toml.bin | each { |bin| $bin.name }
+  } else {
+    [ $toml.package.name ]
+  }
+}

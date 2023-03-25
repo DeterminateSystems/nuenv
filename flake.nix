@@ -95,6 +95,7 @@
               inherit toolchain;
             };
             debug = true;
+            MESSAGE = "hello";
           };
 
         run-me = pkgs.nuenv.mkScript {

@@ -43,7 +43,7 @@
     derivation
       ({
         # Derivation
-        inherit envFile extraPkgs name outputs rust src system;
+        inherit envFile extraPkgs name outputs src system;
 
         # Phases
         inherit build;

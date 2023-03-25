@@ -11,27 +11,12 @@ def relativePath [
   # the default for $env.NIX_STORE is /nix/store; both can be changed via Nix configuration.
 
   if ($path | str starts-with $env.NIX_BUILD_TOP) {
-    $path | parse $"($env.NIX_BUILD_TOP)/{path}" | select path | get path.0
+    $path | parse $"{__root}/{path}" | select path | get path.0
   } else if ($path | str starts-with $env.NIX_STORE) {
-    $path | parse $"($env.NIX_STORE)/{_pkg}/{path}" | select path | get path.0
+    $path | parse $"{__store}/{_pkg}/{path}" | select path | get path.0
   } else {
     $path
   }
-}
-
-# Display the exit code from the previous operation.
-def exit-code [] {
-  $env.LAST_EXIT_CODE
-}
-
-# Display whether the previous operation was a success.
-def was-success [] {
-  $env.LAST_EXIT_CODE == 0
-}
-
-# Display whether the previous operation errored.
-def was-failure [] {
-  $env.LAST_EXIT_CODE != 0
 }
 
 # Display the <msg> in a pretty way.
