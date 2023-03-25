@@ -130,25 +130,23 @@ if "rust" in $drv.rawAttrs {
 
   if $nix.debug {
     info $"Using Rust toolchain package (blue (get-pkg-name $rust.toolchain))"
-    let rustTools = ls $"($rust.toolchain)/bin"
-    info "Rust tools available in the toolchain:"
-    for tool in $rustTools {
-      item (get-pkg-bin $tool.name)
-    }
+
+    display-rust-tools $rust.toolchain
   }
 
-  let target = ($rust | get -i target | default $drv.system)
+  let target = (get-or-default $rust "target" $drv.system)
 
   let allRustPkgs = ($drv.packages | append $rust.toolchain | append $attrs.extraPkgs)
   let-env PATH = (pkgs-path $allRustPkgs)
 
   let toml = open ./Cargo.toml
 
-  info $"Building ($toml.package.name) with cargo OK (blue cargo-version)"
+  info $"Building ($toml.package.name) with cargo (blue cargo-version)"
 
   mut opts = {release: true}
   if "target" in $rust { $opts.target = $rust.target }
   if "ext" in $rust { $opts.ext = $rust.ext }
+
   cargo-build $opts
 
   mkdir $"($env.out)/bin"
@@ -185,11 +183,7 @@ if "rust" in $drv.rawAttrs {
         do --capture-errors {
           nu --env-config $nushell.userEnvFile --commands $phase
 
-          let code = $env.LAST_EXIT_CODE
-
-          if $code != 0 {
-            exit --now $code
-          }
+          exit-on-error
         }
     } else {
       if $nix.debug { info $"Skipping empty (blue $name) phase" }

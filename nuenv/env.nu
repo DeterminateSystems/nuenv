@@ -34,5 +34,18 @@ def get-pkg-bin [path: path] {
   $path | parse "{__store}/{__hash}-{__pkg}/bin/{tool}" | get tool.0
 }
 
+def get-or-default [obj: record, key: string, df: any] {
+  $obj | get -i $key | default $df
+}
+
 # Run any string as a command.
 def run [cmd: string] { nu --commands $cmd }
+
+# Exit if the last operation errored
+def exit-on-error [] {
+  let code = $env.LAST_EXIT_CODE
+
+  if $code != 0 {
+    exit --now $code
+  }
+}

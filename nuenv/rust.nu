@@ -14,3 +14,11 @@ def cargo-build [r: record] {
 def cargo-version [] {
   cargo --version | parse "cargo {v} {__rest}" | get v.0
 }
+
+def display-rust-tools [toolchain: string] {
+  let rustTools = ls $"($toolchain)/bin"
+  info "Rust tools available in the toolchain:"
+  for tool in $rustTools {
+    item (get-pkg-bin $tool.name)
+  }
+}
