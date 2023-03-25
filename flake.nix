@@ -38,7 +38,7 @@
         nuenv = final: prev: {
           nuenv = {
             mkDerivation = self.lib.mkNushellDerivation
-              { inherit (prev) cargo clang lib nushell stdenv; sys = prev.system; };
+              { inherit (prev) cargo clang nushell; sys = prev.system; };
 
             mkScript = self.lib.mkNushellScript
               { inherit (prev) nushell writeTextFile; };
@@ -85,6 +85,7 @@
           rust = {
             toolchain = pkgs.rustToolchain;
           };
+          debug = true;
         };
 
         run-me = pkgs.nuenv.mkScript {
@@ -164,7 +165,7 @@
         direct = self.lib.mkNushellDerivation
           {
             sys = system;
-            inherit (pkgs) cargo clang lib nushell stdenv;
+            inherit (pkgs) cargo clang nushell;
           }
           {
             name = "no-overlay";

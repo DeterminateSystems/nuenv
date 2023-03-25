@@ -206,7 +206,7 @@ if "rust" in $drv.rawAttrs {
   for pkg in $pkgs {
     let source = $"target/release/($pkg)"
     let dest = $"($env.out)/bin/($pkg)"
-    info $"Copying (blue $pkg) to (blue $dest)"
+    info $"Copying (blue $pkg) to (purple $dest)"
     cp $source $dest
   }
 } else {

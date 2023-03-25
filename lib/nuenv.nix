@@ -4,8 +4,6 @@
     # From overlay
     { nushell # Nushell package
     , sys     # Current system
-    , lib     # Nixpkgs lib
-    , stdenv  # Nixpkgs stdenv
     , clang   # Nixpkgs clang
     , cargo   # Nixpkgs default cargo
     }:
@@ -40,7 +38,7 @@
 
       extraAttrs = removeAttrs attrs reservedAttrs;
 
-      extraPkgs = lib.optionals stdenv.isDarwin [ clang clang.bintools.bintools_bin ];
+      extraPkgs = [ clang clang.bintools.bintools_bin ];
     in
     derivation
       ({
