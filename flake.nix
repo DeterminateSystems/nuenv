@@ -83,8 +83,6 @@
           src = ./hello-rs;
           rust = {
             toolchain = pkgs.rustToolchain;
-            target = "wasm32-wasi";
-            ext = "wasm";
           };
           debug = true;
         };
