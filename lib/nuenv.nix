@@ -7,6 +7,7 @@
     , lib     # Nixpkgs lib
     , stdenv  # Nixpkgs stdenv
     , clang   # Nixpkgs clang
+    , cargo   # Nixpkgs default cargo
     }:
 
     # User-supplied args
@@ -44,7 +45,7 @@
     derivation
       ({
         # Derivation
-        inherit envFile extraPkgs name outputs src system;
+        inherit cargo envFile extraPkgs name outputs src system;
 
         # Phases
         inherit build;

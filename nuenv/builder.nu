@@ -167,8 +167,8 @@ if "rust" in $drv.rawAttrs {
   if $nix.debug { info "Building Rust project 🦀" }
 
   let rust = $drv.rawAttrs.rust
-  ensure-set $rust "toolchain" "rust"
-  let toolchain = $rust.toolchain
+
+  let toolchain = if "toolchain" in $rust { $rust.toolchain } else { $attrs.cargo }
 
   if $nix.debug {
     info $"Using Rust toolchain package (blue (get-pkg-name $nix.store $toolchain))"
@@ -186,7 +186,11 @@ if "rust" in $drv.rawAttrs {
 
   let toml = open ./Cargo.toml
 
-  let cargoVersion = (cargo --version | parse "cargo {v} {__rest}" | get v.0)
+  let cargoVersion = (if "toolchain" in $rust {
+    cargo --version | parse "cargo {v} {__rest}" | get v.0
+  } else {
+    cargo --version | parse "cargo {v}{}" | get v.0
+  })
   info $"Building ($toml.package.name) with cargo (blue $cargoVersion)"
 
   cargo build --release
@@ -200,7 +204,10 @@ if "rust" in $drv.rawAttrs {
   }
 
   for pkg in $pkgs {
-    cp $"target/release/($pkg)" $"($env.out)/bin/($pkg)"
+    let source = $"target/release/($pkg)"
+    let dest = $"($env.out)/bin/($pkg)"
+    info $"Copying (blue $pkg) to (blue $dest)"
+    cp $source $dest
   }
 } else {
   # Set PATH for package discovery
