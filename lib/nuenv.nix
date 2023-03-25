@@ -31,6 +31,7 @@
         "src"
         "system"
         "__nu_debug"
+        "__nu_env"
         "__nu_extra_attrs"
         "__nu_packages"
       ];
@@ -49,7 +50,7 @@
 
         # Build logic
         builder = "${nushell}/bin/nu";
-        args = [ ../nuenv/builder.nu ];
+        args = [ ../nuenv/bootstrap.nu ];
 
         # When this is set, Nix writes the environment to a JSON file at
         # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
@@ -57,7 +58,10 @@
         __structuredAttrs = true;
 
         # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
+        __nu_builder = ../nuenv/builder.nu;
+        __nu_nushell = "${nushell}/bin/nu";
         __nu_debug = debug;
+        __nu_env = [ ../nuenv/env.nu ../nuenv/rust.nu ];
         __nu_extra_attrs = extraAttrs;
         __nu_packages = packages;
       } // extraAttrs);

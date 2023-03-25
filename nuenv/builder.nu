@@ -1,50 +1,6 @@
 ## Utility commands
 
-# Logging
-def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
-def blue [msg: string] { color "blue" $msg }
-def green [msg: string] { color "green" $msg }
-def red [msg: string] { color "red" $msg }
-def purple [msg: string] { color "purple" $msg }
-def yellow [msg: string] { color "yellow" $msg }
-
-def banner [text: string] { $"(red ">>>") (green $text)" }
-def info [msg: string] { $"(blue ">") ($msg)" }
-def panic [msg: string] { $"(red "ERROR") ($msg)"; exit 1 }
-def item [msg: string] { $"(purple "+") ($msg)"}
-
-def run [cmd: string] {
-  nu -c $cmd
-}
-
-def ensure-set [obj: record, key: string, objName: string] {
-  if not $key in $obj {
-    panic $"key (blue $key) not set in (blue $objName)"
-  }
-}
-
-def plural [n: int] { if $n > 1 { "s" } else { "" } }
-
-# Convert a Nix Boolean into a Nushell Boolean ("1" = true, "0" = false)
-def env-to-bool [var: string] {
-  ($var | into int) == 1
-}
-
-# Get package root
-def get-pkg-root [path: path] { $path | parse "{root}/bin/{__bin}" | get root.0 }
-
-# Get package name fro full store path
-def get-pkg-name [storeRoot: path, path: path] {
-  $path | parse $"($storeRoot)/{__hash}-{pkg}" | select pkg | get pkg.0
-}
-
-def get-pkg-bin [storeRoot: path, path: path] {
-  $path | parse $"($storeRoot)/{__pkg}/bin/{tool}" | get tool.0
-}
-
-def attr-is-set [obj: record, key: string] {
-  not ($obj | transpose name value | where name == $key | is-empty)
-}
+source env.nu
 
 def pkgs-path [pkgs: list] {
   $pkgs | each { |pkg| $"($pkg)/bin" } | str collect (char esep)
@@ -118,11 +74,9 @@ if $nix.debug { banner "SETUP" }
 if not ($drv.initialPackages | is-empty) {
   let numPackages = ($drv.initialPackages | length)
 
-  if $nix.debug { info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:" }
-
-  for pkg in $drv.initialPackages {
-    let name = get-pkg-name $nix.store $pkg
-    if $nix.debug { item $name }
+  if $nix.debug {
+    info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
+    for pkg in $drv.initialPackages { item (get-pkg-name $pkg) }
   }
 }
 
@@ -168,51 +122,29 @@ if $nix.debug { banner "REALISATION" }
 
 # Rust
 if "rust" in $drv.rawAttrs {
-  if $nix.debug { info "Building Rust project 🦀" }
-
   let rust = $drv.rawAttrs.rust
 
-  let toolchain = if "toolchain" in $rust { $rust.toolchain } else { $attrs.cargo }
+  source rust.nu
+
+  if $nix.debug { info "Building Rust project 🦀" }
 
   if $nix.debug {
-    info $"Using Rust toolchain package (blue (get-pkg-name $nix.store $toolchain))"
-    let rustTools = ls $"($toolchain)/bin"
+    info $"Using Rust toolchain package (blue (get-pkg-name $rust.toolchain))"
+    let rustTools = ls $"($rust.toolchain)/bin"
     info "Rust tools available in the toolchain:"
     for tool in $rustTools {
-      item (get-pkg-bin $nix.store $tool.name)
+      item (get-pkg-bin $tool.name)
     }
   }
 
   let target = ($rust | get -i target | default $drv.system)
 
-  let allRustPkgs = ($drv.packages | append $toolchain | append $attrs.extraPkgs)
+  let allRustPkgs = ($drv.packages | append $rust.toolchain | append $attrs.extraPkgs)
   let-env PATH = (pkgs-path $allRustPkgs)
 
   let toml = open ./Cargo.toml
 
-  let cargoVersion = (if "toolchain" in $rust {
-    cargo --version | parse "cargo {v} {__rest}" | get v.0
-  } else {
-    cargo --version | parse "cargo {v}{}" | get v.0
-  })
-  info $"Building ($toml.package.name) with cargo (blue $cargoVersion)"
-
-  # TODO: make this less janky
-  def cargo-build [r: record] {
-    mut flags = []
-    if ("release" in $r and $r.release) { $flags = ($flags | append {flag: "release"}) }
-    if ("target" in $r) { $flags = ($flags | append {flag: "target", value: $r.target}) }
-    let flagStr = (
-      $flags
-      | each { |f| $"--($f.flag)(if ("value" in $f) { $"(char space)($f.value)" })" }
-      | str collect (char space)
-    )
-    let cargoCmd = $"cargo build ($flagStr)"
-    $cargoCmd
-    run $cargoCmd
-  }
-
-  mkdir $env.out
+  info $"Building ($toml.package.name) with cargo OK (blue cargo-version)"
 
   mut opts = {release: true}
   if "target" in $rust { $opts.target = $rust.target }
