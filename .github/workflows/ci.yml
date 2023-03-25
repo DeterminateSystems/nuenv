@@ -41,6 +41,11 @@ jobs:
           nix build --print-build-logs
           cat result/share/hello.txt
 
+      - name: Build auto-magical Rust derivation
+        run: |
+          nix build --print-build-logs .#auto
+          ./result/bin/say-hello
+
       - name: Build Rust + Wasm example using Nuenv
         run: |
           nix build --print-build-logs .#wasm
