@@ -37,8 +37,7 @@
 
         nuenv = final: prev: {
           nuenv = {
-            mkDerivation = self.lib.mkNushellDerivation
-              { inherit (prev) cargo clang nushell; sys = prev.system; };
+            mkDerivation = self.lib.mkNushellDerivation prev prev.nushell;
 
             mkScript = self.lib.mkNushellScript
               { inherit (prev) nushell writeTextFile; };
@@ -84,6 +83,8 @@
           src = ./hello-rs;
           rust = {
             toolchain = pkgs.rustToolchain;
+            target = "wasm32-wasi";
+            ext = "wasm";
           };
           debug = true;
         };
@@ -162,11 +163,7 @@
         '';
 
         # A non-overlay version
-        direct = self.lib.mkNushellDerivation
-          {
-            sys = system;
-            inherit (pkgs) cargo clang nushell;
-          }
+        direct = self.lib.mkNushellDerivation pkgs pkgs.nushell
           {
             name = "no-overlay";
             src = ./.;

@@ -1,22 +1,21 @@
 {
   # The Nuenv build environment
   mkNushellDerivation =
-    # From overlay
-    { nushell # Nushell package
-    , sys     # Current system
-    , clang   # Nixpkgs clang
-    , cargo   # Nixpkgs default cargo
-    }:
+    # Pinned Nixpkgs from overlay
+    pkgs:
+    # Pinned Nushell
+    nushell:
 
     # User-supplied args
     { name ? "my-pkg"                 # The name of the derivation
     , src                             # The derivation's sources
     , packages ? [ ]                  # Packages provided to the realisation process
-    , system ? sys                    # The build system
+    , system ? pkgs.system            # The build system
     , build ? ""                      # The build phase
     , debug ? true                    # Run in debug mode
     , outputs ? [ "out" ]             # Outputs to provide
     , envFile ? ../nuenv/user-env.nu  # Nushell environment passed to build phases
+    , rust ? null                     # Rust config
     , ...                             # Catch user-supplied env vars
     }@attrs:
 
@@ -38,12 +37,12 @@
 
       extraAttrs = removeAttrs attrs reservedAttrs;
 
-      extraPkgs = [ clang clang.bintools.bintools_bin ];
+      extraPkgs = pkgs.lib.optionals (rust != null) (with pkgs; [ clang clang.bintools.bintools_bin ]);
     in
     derivation
       ({
         # Derivation
-        inherit cargo envFile extraPkgs name outputs src system;
+        inherit envFile extraPkgs name outputs rust src system;
 
         # Phases
         inherit build;

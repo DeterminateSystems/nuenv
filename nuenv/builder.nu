@@ -13,6 +13,10 @@ def info [msg: string] { $"(blue ">") ($msg)" }
 def panic [msg: string] { $"(red "ERROR") ($msg)"; exit 1 }
 def item [msg: string] { $"(purple "+") ($msg)"}
 
+def run [cmd: string] {
+  nu -c $cmd
+}
+
 def ensure-set [obj: record, key: string, objName: string] {
   if not $key in $obj {
     panic $"key (blue $key) not set in (blue $objName)"
@@ -193,7 +197,25 @@ if "rust" in $drv.rawAttrs {
   })
   info $"Building ($toml.package.name) with cargo (blue $cargoVersion)"
 
-  cargo build --release
+  # TODO: make this less janky
+  def cargo-build [r: record] {
+    mut flags = []
+    if ("release" in $r and $r.release) { $flags = ($flags | append {flag: "release"}) }
+    if ("target" in $r) { $flags = ($flags | append {flag: "target", value: $r.target}) }
+    let flagStr = (
+      $flags
+      | each { |f| $"--($f.flag)(if ("value" in $f) { $"(char space)($f.value)" })" }
+      | str collect (char space)
+    )
+    let cargoCmd = $"cargo build ($flagStr)"
+    $cargoCmd
+    run $cargoCmd
+  }
+
+  mut opts = {release: true}
+  if "target" in $rust { $opts.target = $rust.target }
+  if "ext" in $rust { $opts.ext = $rust.ext }
+  cargo-build $opts
 
   mkdir $"($env.out)/bin"
 
@@ -204,8 +226,10 @@ if "rust" in $drv.rawAttrs {
   }
 
   for pkg in $pkgs {
-    let source = $"target/release/($pkg)"
-    let dest = $"($env.out)/bin/($pkg)"
+    let dir = $"target/(if "target" in $opts { $"($opts.target)/release" } else { "release" })"
+    let bin = $"($pkg)(if "ext" in $opts { $".($opts.ext)" })"
+    let source = $"($dir)/($bin)"
+    let dest = $"($env.out)/bin/($bin)"
     info $"Copying (blue $pkg) to (purple $dest)"
     cp $source $dest
   }
