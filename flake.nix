@@ -38,16 +38,10 @@
         nuenv = final: prev: {
           nuenv = {
             mkDerivation = self.lib.mkNushellDerivation
-              # Provide Nushell package
-              prev.nushell
-              # Provide default system
-              prev.system;
+              { inherit (prev) clang lib nushell stdenv; sys = prev.system; };
 
             mkScript = self.lib.mkNushellScript
-              # Provide Nushell package
-              prev.nushell
-              # Provide helper function
-              prev.writeTextFile;
+              { inherit (prev) nushell writeTextFile; };
 
             # TODO: mkShell
           };
@@ -86,11 +80,10 @@
         default = hello;
 
         auto = pkgs.nuenv.mkDerivation {
+          name = "auto";
           src = ./hello-rs;
           rust = {
             toolchain = pkgs.rustToolchain;
-            # I'll find a way to get rid of this later
-            extras = with pkgs; [ coreutils clang clang.bintools.bintools_bin ];
           };
         };
 
@@ -168,16 +161,21 @@
         '';
 
         # A non-overlay version
-        direct = self.lib.mkNushellDerivation pkgs.nushell system {
-          name = "no-overlay";
-          src = ./.;
-          build = ''
-            let share = $"($env.out)/share"
-            (version).version | save nushell-version.txt
-            mkdir $share
-            cp nushell-version.txt $share
-          '';
-        };
+        direct = self.lib.mkNushellDerivation
+          {
+            sys = system;
+            inherit (pkgs) clang lib nushell stdenv;
+          }
+          {
+            name = "no-overlay";
+            src = ./.;
+            build = ''
+              let share = $"($env.out)/share"
+              (version).version | save nushell-version.txt
+              mkdir $share
+              cp nushell-version.txt $share
+            '';
+          };
 
         # Show that Nuenv works when drawing sources from GitHub
         githubSrc = pkgs.nuenv.mkDerivation {

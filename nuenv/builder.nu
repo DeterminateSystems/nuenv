@@ -80,6 +80,7 @@ let drv = {
     | append $nushell.pkg # Add the Nushell package to the PATH
     | split row (char space)
   ),
+  extraPkgs: $attrs.extraPkgs,
   rawAttrs: $attrs.__nu_extra_attrs,
   extraAttrs: ($attrs.__nu_extra_attrs | transpose key value), # Arbitrary environment variables
 }
@@ -180,19 +181,27 @@ if "rust" in $drv.rawAttrs {
 
   let target = ($rust | get -i target | default $drv.system)
 
-  let extraPkgs = ($rust | get -i extras | default [])
-  let allRustPkgs = ($drv.packages | append $toolchain | append $extraPkgs)
+  let allRustPkgs = ($drv.packages | append $toolchain | append $attrs.extraPkgs)
   let-env PATH = (pkgs-path $allRustPkgs)
 
-  let name = (open ./Cargo.toml | get package.name)
+  let toml = open ./Cargo.toml
 
   let cargoVersion = (cargo --version | parse "cargo {v} {__rest}" | get v.0)
-  info $"Building ($name) with cargo (blue $cargoVersion)"
+  info $"Building ($toml.package.name) with cargo (blue $cargoVersion)"
 
   cargo build --release
 
   mkdir $"($env.out)/bin"
-  cp $"target/release/($name)" $"($env.out)/bin/($name)"
+
+  let pkgs = if "bin" in $toml {
+    $toml.bin | each { |bin| $bin.name }
+  } else {
+    [ $toml.package.name ]
+  }
+
+  for pkg in $pkgs {
+    cp $"target/release/($pkg)" $"($env.out)/bin/($pkg)"
+  }
 } else {
   # Set PATH for package discovery
   let-env PATH = (pkgs-path $drv.packages)

@@ -1,9 +1,15 @@
 {
   # The Nuenv build environment
   mkNushellDerivation =
-    nushell: # nixpkgs.nushell (from overlay)
-    sys: # nixpkgs.system (from overlay)
+    # From overlay
+    { nushell # Nushell package
+    , sys     # Current system
+    , lib     # Nixpkgs lib
+    , stdenv  # Nixpkgs stdenv
+    , clang   # Nixpkgs clang
+    }:
 
+    # User-supplied args
     { name ? "my-pkg"                 # The name of the derivation
     , src                             # The derivation's sources
     , packages ? [ ]                  # Packages provided to the realisation process
@@ -32,33 +38,39 @@
       ];
 
       extraAttrs = removeAttrs attrs reservedAttrs;
+
+      extraPkgs = lib.optionals stdenv.isDarwin [ clang clang.bintools.bintools_bin ];
     in
-    derivation ({
-      # Derivation
-      inherit envFile name outputs src system;
+    derivation
+      ({
+        # Derivation
+        inherit envFile extraPkgs name outputs src system;
 
-      # Phases
-      inherit build;
+        # Phases
+        inherit build;
 
-      # Build logic
-      builder = "${nushell}/bin/nu";
-      args = [ ../nuenv/builder.nu ];
+        # Build logic
+        builder = "${nushell}/bin/nu";
+        args = [ ../nuenv/builder.nu ];
 
-      # When this is set, Nix writes the environment to a JSON file at
-      # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
-      # is generally cleaner than parsing environment variables as strings.
-      __structuredAttrs = true;
+        # When this is set, Nix writes the environment to a JSON file at
+        # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
+        # is generally cleaner than parsing environment variables as strings.
+        __structuredAttrs = true;
 
-      # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-      __nu_debug = debug;
-      __nu_extra_attrs = extraAttrs;
-      __nu_packages = packages;
-    } // extraAttrs);
+        # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
+        __nu_debug = debug;
+        __nu_extra_attrs = extraAttrs;
+        __nu_packages = packages;
+      } // extraAttrs);
 
   mkNushellScript =
-    nushell: # nixpkgs.nushell (from overlay)
-    writeTextFile: # Utility function (from overlay)
+    # From overlay
+    { nushell
+    , writeTextFile
+    }:
 
+    # User-supplied args
     { name
     , script
     , bin ? name
