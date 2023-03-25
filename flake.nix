@@ -42,6 +42,9 @@
             mkScript = self.lib.mkNushellScript
               { inherit (prev) nushell writeTextFile; };
 
+            mkRust =
+              self.lib.mkNushellRust { pkgs = prev.extend rust-overlay.overlays.default; };
+
             # TODO: mkShell
           };
         };
@@ -50,6 +53,7 @@
       lib = {
         inherit (import ./lib/nuenv.nix)
           mkNushellDerivation
+          mkNushellRust
           mkNushellScript;
       };
 
@@ -78,14 +82,20 @@
       packages = forAllSystems ({ pkgs, system }: rec {
         default = hello;
 
-        auto = pkgs.nuenv.mkDerivation {
-          name = "auto";
-          src = ./hello-rs;
-          rust = {
-            toolchain = pkgs.rustToolchain;
+        auto =
+          let
+            toolchain = pkgs.nuenv.mkRust {
+              toolchainFile = ./rust-toolchain.toml;
+            };
+          in
+          pkgs.nuenv.mkDerivation {
+            name = "auto";
+            src = ./hello-rs;
+            rust = {
+              inherit toolchain;
+            };
+            debug = true;
           };
-          debug = true;
-        };
 
         run-me = pkgs.nuenv.mkScript {
           name = "run-me";

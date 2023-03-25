@@ -62,6 +62,18 @@
         __nu_packages = packages;
       } // extraAttrs);
 
+  mkNushellRust =
+    { pkgs }:
+    { toolchainFile ? null
+    }:
+    let
+      toolchain =
+        if (toolchainFile != null) then
+          pkgs.rust-bin.fromRustupToolchainFile toolchainFile
+        else pkgs.rust-bin.stable.latest.minimal;
+    in
+    toolchain;
+
   mkNushellScript =
     # From overlay
     { nushell
