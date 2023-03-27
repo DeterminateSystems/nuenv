@@ -71,12 +71,12 @@
         __nu_packages = packages;
       } // extraAttrs);
 
-  mkNushellRust =
+  mkNushellRustDerivation =
     pkgs:
 
-    { toolchainFile ? null, depsHash, src }:
+    { name, src, toolchainFile ? null, depsHash, debug ? true }:
 
-    {
+    let
       toolchain =
         if (toolchainFile != null) then
           pkgs.rust-bin.fromRustupToolchainFile toolchainFile
@@ -86,6 +86,12 @@
         name = "cargo-deps";
         inherit src;
         hash = depsHash;
+      };
+    in
+    pkgs.nuenv.mkDerivation {
+      inherit debug name src;
+      rust = {
+        inherit deps toolchain;
       };
     };
 

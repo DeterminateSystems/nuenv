@@ -94,7 +94,7 @@ if $nix.debug { banner "REALISATION" }
 
 # Rust
 if "rust" in $attrs {
-  let rust = $attrs.rust.toolchain
+  let rust = $attrs.rust
 
   let depsTarball = $rust.deps
 
@@ -121,7 +121,7 @@ if "rust" in $attrs {
   if "target" in $rust { $opts.target = $rust.target }
   if "ext" in $rust { $opts.ext = $rust.ext }
 
-  # Fetch dependencies
+  # Fetch dependencies (this doesn't work yet)
   #tar -xvzf $depsTarball
   #rm $"($nix.sandbox)/Cargo.lock"
   #mv cargo-deps-vendor.tar.gz/.cargo $nix.sandbox

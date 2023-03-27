@@ -42,8 +42,11 @@
             mkScript = self.lib.mkNushellScript
               { inherit (prev) nushell writeTextFile; };
 
-            mkRust =
-              self.lib.mkNushellRust (prev.extend rust-overlay.overlays.default);
+            mkRustDerivation =
+              let
+                pkgs = prev.extend rust-overlay.overlays.default;
+              in
+              self.lib.mkNushellRustDerivation pkgs;
 
             # TODO: mkShell
           };
@@ -53,21 +56,17 @@
       lib = {
         inherit (import ./lib/nuenv.nix)
           mkNushellDerivation
-          mkNushellRust
+          mkNushellRustDerivation
           mkNushellScript;
       };
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ nushell self.packages.${system}.hello-wasm ];
+          packages = with pkgs; [ nushell ];
         };
 
         ci = pkgs.mkShell {
           packages = with pkgs; [ cachix direnv nushell ];
-        };
-
-        wasm = pkgs.mkShell {
-          packages = with pkgs; [ nushell rustToolchain wasmtime ];
         };
 
         # A dev environment with Nuenv's helper functions available
@@ -82,23 +81,13 @@
       packages = forAllSystems ({ pkgs, system }: rec {
         default = hello;
 
-        auto =
-          let
-            toolchain = pkgs.nuenv.mkRust {
-              src = ./hello-rs;
-              toolchainFile = ./hello-rs/rust-toolchain.toml;
-              depsHash = "sha256-Y5tLXjHpfwlKrH6Pq3xEa2oxhNTF8TfK9dzw48JV5M0=";
-            };
-          in
-          pkgs.nuenv.mkDerivation {
-            name = "auto";
-            src = ./hello-rs;
-            rust = {
-              inherit toolchain;
-            };
-            debug = true;
-            MESSAGE = "hello";
-          };
+        hello-rust = pkgs.nuenv.mkRustDerivation {
+          name = "hello-rust";
+          src = ./hello-rs;
+          toolchainFile = ./hello-rs/rust-toolchain.toml;
+          depsHash = "sha256-Y5tLXjHpfwlKrH6Pq3xEa2oxhNTF8TfK9dzw48JV5M0=";
+          debug = true;
+        };
 
         run-me = pkgs.nuenv.mkScript {
           name = "run-me";
@@ -137,54 +126,17 @@
           MESSAGE = "Hello from Nix + Bash, but no debugging this time";
         };
 
-        wasm =
-          let
-            # An example of building a wrapper around Nuenv
-            buildRustWasm =
-              { name
-              , src
-              , target ? "wasm32-wasi"
-              , bin ? name
-              , rust
-              , debug ? false
-              }: pkgs.nuenv.mkDerivation {
-                inherit debug name src;
-                packages = [ rust ];
-                build = ''
-                  let bin = $"($env.out)/bin"
-                  log $"Creating bin output directory at ($bin)"
-                  mkdir $bin
-                  log $"Building with (cargo --version)"
-                  cargo build --target ${target} --release
-                  log $"Copying Wasm binary to ($bin)"
-                  cp target/wasm32-wasi/release/${bin}.wasm $bin
-                '';
-              };
-          in
-          buildRustWasm {
-            name = "nix-nushell-rust-wasm";
-            src = ./rust-wasm-example;
-            bin = "rust-wasm-example";
-            rust = pkgs.rustToolchain;
-            debug = true;
-          };
-
-        hello-wasm = pkgs.writeScriptBin "hello-wasm" ''
-          ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm "''${@}"
-        '';
-
         # A non-overlay version
-        direct = self.lib.mkNushellDerivation pkgs pkgs.nushell
-          {
-            name = "no-overlay";
-            src = ./.;
-            build = ''
-              let share = $"($env.out)/share"
-              (version).version | save nushell-version.txt
-              mkdir $share
-              cp nushell-version.txt $share
-            '';
-          };
+        direct = self.lib.mkNushellDerivation pkgs pkgs.nushell {
+          name = "no-overlay";
+          src = ./.;
+          build = ''
+            let share = $"($env.out)/share"
+            (version).version | save nushell-version.txt
+            mkdir $share
+            cp nushell-version.txt $share
+          '';
+        };
 
         # Show that Nuenv works when drawing sources from GitHub
         githubSrc = pkgs.nuenv.mkDerivation {
