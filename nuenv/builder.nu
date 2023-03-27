@@ -122,22 +122,12 @@ if "rust" in $attrs {
   if "ext" in $rust { $opts.ext = $rust.ext }
 
   # Fetch dependencies
-  tar -xvzf $depsTarball
-
-  ls --all cargo-deps-vendor.tar.gz | select name | each { $in.name }
-
-  rm $"($nix.sandbox)/Cargo.lock"
-  mv cargo-deps-vendor.tar.gz/.cargo $nix.sandbox
-  mv cargo-deps-vendor.tar.gz/Cargo.lock $nix.sandbox
-  rm -rf cargo-deps-vendor.tar.gz
-
-  ls --all | select name | each { $in.name }
-  ls --all .cargo | select name | each { $in.name }
-
-  info "Cargo config"
-  open .cargo/config
-
-  let-env CARGO_HOME = $"($nix.sandbox)/.cargo"
+  #tar -xvzf $depsTarball
+  #rm $"($nix.sandbox)/Cargo.lock"
+  #mv cargo-deps-vendor.tar.gz/.cargo $nix.sandbox
+  #mv cargo-deps-vendor.tar.gz/Cargo.lock $nix.sandbox
+  #rm -rf cargo-deps-vendor.tar.gz
+  #let-env CARGO_HOME = $"($nix.sandbox)/.cargo"
 
   cargo-build $opts
 
