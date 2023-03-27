@@ -1,18 +1,22 @@
 {
   # The Nuenv build environment
   mkNushellDerivation =
-    nushell: # nixpkgs.nushell (from overlay)
-    sys: # nixpkgs.system (from overlay)
+    # Pinned Nixpkgs from overlay
+    pkgs:
+    # Pinned Nushell
+    nushell:
 
-    { name                              # The name of the derivation
-    , src                               # The derivation's sources
-    , packages ? [ ]                    # Packages provided to the realisation process
-    , system ? sys                      # The build system
-    , build ? ""                        # The build phase
-    , debug ? true                      # Run in debug mode
-    , outputs ? [ "out" ]               # Outputs to provide
+    # User-supplied args
+    { name ? "my-pkg"                 # The name of the derivation
+    , src                             # The derivation's sources
+    , packages ? [ ]                  # Packages provided to the realisation process
+    , system ? pkgs.system            # The build system
+    , build ? ""                      # The build phase
+    , debug ? true                    # Run in debug mode
+    , outputs ? [ "out" ]             # Outputs to provide
     , envFile ? ../nuenv/user-env.nu  # Nushell environment passed to build phases
-    , ...                               # Catch user-supplied env vars
+    , rust ? null                     # Rust config
+    , ...                             # Catch user-supplied env vars
     }@attrs:
 
     let
@@ -33,36 +37,71 @@
       ];
 
       extraAttrs = removeAttrs attrs reservedAttrs;
+
+      extraPkgs = pkgs.lib.optionals (rust != null) (with pkgs; [
+        clang
+        clang.bintools.bintools_bin
+        gnutar
+        gzip
+      ]);
     in
-    derivation ({
-      # Derivation
-      inherit envFile name outputs src system;
+    derivation
+      ({
+        # Derivation
+        inherit envFile extraPkgs name outputs src system;
 
-      # Phases
-      inherit build;
+        # Phases
+        inherit build;
 
-      # Build logic
-      builder = "${nushell}/bin/nu";
-      args = [ ../nuenv/bootstrap.nu ];
+        # Build logic
+        builder = "${nushell}/bin/nu";
+        args = [ ../nuenv/bootstrap.nu ];
 
-      # When this is set, Nix writes the environment to a JSON file at
-      # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
-      # is generally cleaner than parsing environment variables as strings.
-      __structuredAttrs = true;
+        # When this is set, Nix writes the environment to a JSON file at
+        # $NIX_BUILD_TOP/.attrs.json. Because Nushell can handle JSON natively, this approach
+        # is generally cleaner than parsing environment variables as strings.
+        __structuredAttrs = true;
 
-      # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
-      __nu_builder = ../nuenv/builder.nu;
-      __nu_nushell = "${nushell}/bin/nu";
-      __nu_debug = debug;
-      __nu_env = [ ../nuenv/env.nu ];
-      __nu_extra_attrs = extraAttrs;
-      __nu_packages = packages;
-    } // extraAttrs);
+        # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
+        __nu_builder = ../nuenv/builder.nu;
+        __nu_nushell = "${nushell}/bin/nu";
+        __nu_debug = debug;
+        __nu_env = [ ../nuenv/env.nu ../nuenv/rust.nu ];
+        __nu_extra_attrs = extraAttrs;
+        __nu_packages = packages;
+      } // extraAttrs);
+
+  mkNushellRustDerivation =
+    pkgs:
+
+    { name, src, toolchainFile ? null, depsHash, debug ? true }:
+
+    let
+      toolchain =
+        if (toolchainFile != null) then
+          pkgs.rust-bin.fromRustupToolchainFile toolchainFile
+        else pkgs.rust-bin.stable.latest.minimal;
+
+      deps = pkgs.rustPlatform.fetchCargoTarball {
+        name = "cargo-deps";
+        inherit src;
+        hash = depsHash;
+      };
+    in
+    pkgs.nuenv.mkDerivation {
+      inherit debug name src;
+      rust = {
+        inherit deps toolchain;
+      };
+    };
 
   mkNushellScript =
-    nushell: # nixpkgs.nushell (from overlay)
-    writeTextFile: # Utility function (from overlay)
+    # From overlay
+    { nushell
+    , writeTextFile
+    }:
 
+    # User-supplied args
     { name
     , script
     , bin ? name

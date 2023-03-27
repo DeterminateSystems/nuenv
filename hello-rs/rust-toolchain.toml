@@ -1,0 +1,4 @@
+[toolchain]
+channel = "1.67.0"
+targets = ["wasm32-wasi"]
+profile = "minimal"       # We'll keep it minimal to cut down on build time

@@ -1,18 +1,8 @@
-## Utility commands
-
 source env.nu
 
 ## Parse the build environment
 
-# This branching is a necessary workaround for a bug in the Nix CLI fixed in
-# https://github.com/NixOS/nix/pull/8053
-let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
-  $env.NIX_ATTRS_JSON_FILE
-} else {
-  $"($env.NIX_BUILD_TOP)/.attrs.json"
-}
-
-let attrs = open $attrsJsonFile
+let attrs = attrs-json
 let initialPkgs = $attrs.__nu_packages
 
 # Nushell attributes
@@ -36,6 +26,8 @@ let drv = {
     | append $nushell.pkg # Add the Nushell package to the PATH
     | split row (char space)
   ),
+  extraPkgs: $attrs.extraPkgs,
+  rawAttrs: $attrs.__nu_extra_attrs,
   extraAttrs: ($attrs.__nu_extra_attrs | transpose key value), # Arbitrary environment variables
 }
 
@@ -68,36 +60,14 @@ if $nix.debug { banner "SETUP" }
 if not ($drv.initialPackages | is-empty) {
   let numPackages = ($drv.initialPackages | length)
 
-  if $nix.debug { info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:" }
-
-  for pkg in $drv.initialPackages {
-    let name = get-pkg-name $nix.store $pkg
-    if $nix.debug { item $name }
+  if $nix.debug {
+    info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
+    for pkg in $drv.initialPackages { item (get-pkg-name $pkg) }
   }
 }
 
 # Collect all packages into a string and set PATH
 if $nix.debug { info $"Setting (purple "PATH")" }
-
-let packagesPath = (
-  $drv.packages                  # List of strings
-  | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
-  | str collect (char esep)      # Collect into a single colon-separate string
-)
-let-env PATH = $packagesPath
-
-# Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
-# list by removing reserved attributes (name, system, build, src, system, etc.).
-let numAttrs = ($drv.extraAttrs | length)
-
-if not ($numAttrs == 0) {
-  if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
-
-  for attr in $drv.extraAttrs {
-    if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
-    let-env $attr.key = $attr.value
-  }
-}
 
 # Copy sources
 if $nix.debug { info "Copying sources" }
@@ -122,35 +92,80 @@ if $nix.debug { banner "REALISATION" }
 
 ## Realisation phases (just build and install for now, more later)
 
-# Run a derivation phase (skip if empty)
-def runPhase [
-  name: string,
-] {
-  let phase = ($attrs | get $name)
+# Rust
+if "rust" in $attrs {
+  let rust = $attrs.rust
 
-  if not ($phase | is-empty) {
-    if $nix.debug { info $"Running (blue $name) phase" }
-      # We need to source the envFile prior to each phase so that custom Nushell
-      # commands are registered. Right now there's a single env file but in
-      # principle there could be per-phase scripts.
-      do --capture-errors {
-        nu --env-config $nushell.userEnvFile --commands $phase
+  let depsTarball = $rust.deps
 
-        let code = $env.LAST_EXIT_CODE
+  source rust.nu
 
-        if $code != 0 {
-          exit --now $code
-        }
-      }
-  } else {
-    if $nix.debug { info $"Skipping empty (blue $name) phase" }
+  if $nix.debug { info "Building Rust project 🦀" }
+
+  if $nix.debug {
+    info $"Using Rust toolchain package (blue (get-pkg-name $rust.toolchain))"
+
+    display-rust-tools $rust.toolchain
   }
-}
 
-# The available phases
-for phase in [
-  "build"
-] { runPhase $phase }
+  let target = (get-or-default $rust "target" $drv.system)
+
+  let allRustPkgs = ($drv.packages | append $rust.toolchain | append $attrs.extraPkgs)
+  let-env PATH = (pkgs-path $allRustPkgs)
+
+  let toml = open ./Cargo.toml
+
+  info $"Building ($toml.package.name) with cargo (blue cargo-version)"
+
+  mut opts = {release: true}
+  if "target" in $rust { $opts.target = $rust.target }
+  if "ext" in $rust { $opts.ext = $rust.ext }
+
+  # Fetch dependencies (this doesn't work yet)
+  #tar -xvzf $depsTarball
+  #rm $"($nix.sandbox)/Cargo.lock"
+  #mv cargo-deps-vendor.tar.gz/.cargo $nix.sandbox
+  #mv cargo-deps-vendor.tar.gz/Cargo.lock $nix.sandbox
+  #rm -rf cargo-deps-vendor.tar.gz
+  #let-env CARGO_HOME = $"($nix.sandbox)/.cargo"
+
+  cargo-build $opts
+
+  mk-out-dir "bin"
+
+  let pkgs = get-bins $toml
+
+  for pkg in $pkgs {
+    let dir = $"target/(if "target" in $opts { $"($opts.target)/release" } else { "release" })"
+    let bin = $"($pkg)(if "ext" in $opts { $".($opts.ext)" })"
+    let source = $"($dir)/($bin)"
+    let dest = $"($env.out)/bin/($bin)"
+    info $"Copying (blue $pkg) into (purple (get-relative-pkg-path $dest))"
+    cp $source $dest
+  }
+} else {
+  # Set PATH for package discovery
+  let-env PATH = (pkgs-path $drv.packages)
+
+  # Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
+  # list by removing reserved attributes (name, system, build, src, system, etc.).
+  let numAttrs = ($drv.extraAttrs | length)
+
+  if not ($numAttrs == 0) {
+    # TODO: move this into the non-Rust/etc path
+    if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
+
+    for attr in $drv.extraAttrs {
+      if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
+      let-env $attr.key = $attr.value
+    }
+  }
+
+  # Run derivation phases
+  for phase in [
+    "build"
+  ] { run-phase $attrs $phase $nushell.userEnvFile $nix.debug }
+}
 
 ## Run if realisation succeeds
 if $nix.debug {
