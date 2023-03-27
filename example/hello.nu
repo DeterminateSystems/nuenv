@@ -11,7 +11,7 @@ def purple [msg: string] { $"(ansi purple)($msg)(ansi reset)" }
 
 log $"Running hello version (blue $helloVersion)"
 
-log $"Creating $out directory at (purple $shareDir)"
+log $"Creating (blue "$out") directory at (purple $shareDir)"
 mkdir $shareDir
 
 log $"Writing hello message to (purple $helloOutputFile)"
