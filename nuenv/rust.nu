@@ -1,5 +1,5 @@
 def cargo-build [r: record] {
-  mut flags = []
+  mut flags = [{flag: "offline"}]
   if ("release" in $r and $r.release) { $flags = ($flags | append {flag: "release"}) }
   if ("target" in $r) { $flags = ($flags | append {flag: "target", value: $r.target}) }
   let flagStr = (

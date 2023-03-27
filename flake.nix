@@ -43,7 +43,7 @@
               { inherit (prev) nushell writeTextFile; };
 
             mkRust =
-              self.lib.mkNushellRust { pkgs = prev.extend rust-overlay.overlays.default; };
+              self.lib.mkNushellRust (prev.extend rust-overlay.overlays.default);
 
             # TODO: mkShell
           };
@@ -85,7 +85,9 @@
         auto =
           let
             toolchain = pkgs.nuenv.mkRust {
-              toolchainFile = ./rust-toolchain.toml;
+              src = ./hello-rs;
+              toolchainFile = ./hello-rs/rust-toolchain.toml;
+              depsHash = "sha256-Y5tLXjHpfwlKrH6Pq3xEa2oxhNTF8TfK9dzw48JV5M0=";
             };
           in
           pkgs.nuenv.mkDerivation {

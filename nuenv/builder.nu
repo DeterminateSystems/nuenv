@@ -94,7 +94,9 @@ if $nix.debug { banner "REALISATION" }
 
 # Rust
 if "rust" in $attrs {
-  let rust = $attrs.rust
+  let rust = $attrs.rust.toolchain
+
+  let depsTarball = $rust.deps
 
   source rust.nu
 
@@ -118,6 +120,24 @@ if "rust" in $attrs {
   mut opts = {release: true}
   if "target" in $rust { $opts.target = $rust.target }
   if "ext" in $rust { $opts.ext = $rust.ext }
+
+  # Fetch dependencies
+  tar -xvzf $depsTarball
+
+  ls --all cargo-deps-vendor.tar.gz | select name | each { $in.name }
+
+  rm $"($nix.sandbox)/Cargo.lock"
+  mv cargo-deps-vendor.tar.gz/.cargo $nix.sandbox
+  mv cargo-deps-vendor.tar.gz/Cargo.lock $nix.sandbox
+  rm -rf cargo-deps-vendor.tar.gz
+
+  ls --all | select name | each { $in.name }
+  ls --all .cargo | select name | each { $in.name }
+
+  info "Cargo config"
+  open .cargo/config
+
+  let-env CARGO_HOME = $"($nix.sandbox)/.cargo"
 
   cargo-build $opts
 

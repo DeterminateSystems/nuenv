@@ -38,7 +38,12 @@
 
       extraAttrs = removeAttrs attrs reservedAttrs;
 
-      extraPkgs = pkgs.lib.optionals (rust != null) (with pkgs; [ clang clang.bintools.bintools_bin ]);
+      extraPkgs = pkgs.lib.optionals (rust != null) (with pkgs; [
+        clang
+        clang.bintools.bintools_bin
+        gnutar
+        gzip
+      ]);
     in
     derivation
       ({
@@ -67,16 +72,22 @@
       } // extraAttrs);
 
   mkNushellRust =
-    { pkgs }:
-    { toolchainFile ? null
-    }:
-    let
+    pkgs:
+
+    { toolchainFile ? null, depsHash, src }:
+
+    {
       toolchain =
         if (toolchainFile != null) then
           pkgs.rust-bin.fromRustupToolchainFile toolchainFile
         else pkgs.rust-bin.stable.latest.minimal;
-    in
-    toolchain;
+
+      deps = pkgs.rustPlatform.fetchCargoTarball {
+        name = "cargo-deps";
+        inherit src;
+        hash = depsHash;
+      };
+    };
 
   mkNushellScript =
     # From overlay
