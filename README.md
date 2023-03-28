@@ -3,9 +3,9 @@
 ![GitHub Actions status badge](https://github.com/DeterminateSystems/nuenv/actions/workflows/ci.yml/badge.svg?branch=main)
 
 > **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for
-> others&mdash;but not something you should use for any serious purpose.
+> others&mdash;but not something you should use for any serious purpose just yet.
 
-This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
+**Nuenv** is an as an alternative builder for [Nix] that uses [Nushell] instead of [Bash] as in Nix's [standard environment][stdenv].
 For more information, check out [Nuenv: an experimental Nushell environment for Nix][post] on the [Determinate Systems blog][blog].
 
 ## Running the scenario
@@ -17,7 +17,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
   | sh -s -- install
 ```
 
-With Nix installed, you can [realise] a Nix [derivation]:
+With Nix installed, you can [realise] a Nix [derivation] that uses Nuenv instead of stdenv:
 
 ```shell
 nix build --print-build-logs
@@ -28,6 +28,7 @@ You should see build output like this:
 ```shell
 hello-nix-nushell> >>> INFO
 hello-nix-nushell> > Realising the hello-nix-nushell derivation for aarch64-darwin
+hello-nix-nushell> > Running on 10 cores
 hello-nix-nushell> > Using Nushell 0.77.0
 hello-nix-nushell> > Declared build outputs:
 hello-nix-nushell> + out
@@ -38,15 +39,16 @@ hello-nix-nushell> > Setting PATH
 hello-nix-nushell> > Setting 1 user-supplied environment variable:
 hello-nix-nushell> + MESSAGE = "Hello from Nix + Bash"
 hello-nix-nushell> > Copying sources
-hello-nix-nushell> > Creating output directories
+hello-nix-nushell> > Setting 1 output environment variable:
+hello-nix-nushell> + out = "/nix/store/sh0fwq19q80v6p6dgwx6pipcy444qv2d-hello-nix-nushell"
 hello-nix-nushell> >>> REALISATION
 hello-nix-nushell> > Running build phase
 hello-nix-nushell> + Running hello version 2.12.1
-hello-nix-nushell> + Creating output directory at /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share
-hello-nix-nushell> + Writing hello message to /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share/hello.txt
-hello-nix-nushell> + Substituting Bash for Nushell in /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell/share/hello.txt
+hello-nix-nushell> + Creating $out directory at /nix/store/sh0fwq19q80v6p6dgwx6pipcy444qv2d-hello-nix-nushell/share
+hello-nix-nushell> + Writing hello message to /nix/store/sh0fwq19q80v6p6dgwx6pipcy444qv2d-hello-nix-nushell/share/hello.txt
+hello-nix-nushell> + Substituting "Bash" for "Nushell" in /nix/store/sh0fwq19q80v6p6dgwx6pipcy444qv2d-hello-nix-nushell/share/hello.txt
 hello-nix-nushell> >>> DONE!
-hello-nix-nushell> > out output written to /nix/store/n0dqy5gpshz21hp1qhgj6795nahqpdyc-hello-nix-nushell
+hello-nix-nushell> + out output written to /nix/store/sh0fwq19q80v6p6dgwx6pipcy444qv2d-hello-nix-nushell
 ```
 
 This derivation does something very straightforward: it provides a message to GNU's [hello] tool and saves the result in a text file called `hello.txt` under the `share` directory.
@@ -57,16 +59,26 @@ cat ./result/share/hello.txt
 
 ## How it works
 
-The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash]. The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment. In addition to `builder.nu`, [`env.nu`](./env.nu) provides helper functions to your realisation scripts.
+The key differentiator from regular Nix here is that [realisation][realise] happens in [Nushell] scripts rather than in [Bash].
+The project's [flake] in [`flake.nix`](./flake.nix) outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses a Nushell script as the `builder`.
+
+More specifically:
+
+* The [`bootstrap.nu`](./nuenv/bootstrap.nu) script performs some bootstrapping operations, such as enabling the sandbox environment to discover Nushell itself.
+* The bootstrap script runs the [`builder.nu`](./nuenv/builder.nu) script, which performs the actual build.
+* The [`user-env.nu`](./nuenv/user-env.nu) script provides helper functions, like [`substituteInPlace`](./nuenv/user-env.nu#L79-L94), that you can use in your derivation logic.
+
+The Nix logic that wraps all of this is in [`nuenv.nix`](./lib/nuenv.nix#L2-L60).
 
 ## Try it out
 
-You can use nuenv to realise your own derivations. Here's a straightforward example:
+In addition to running the [example build](#running-the-scenario) up above, you can use Nuenv to realise your own derivations.
+Here's a straightforward example:
 
 ```nix
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/release-22.11";
+    nixpkgs.url = "nixpkgs"; # Make sure to use a very recent Nixpkgs
     nuenv.url = "github:DeterminateSystems/nuenv";
   };
 

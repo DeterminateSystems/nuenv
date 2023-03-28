@@ -13,7 +13,7 @@ let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
 }
 
 let attrs = open $attrsJsonFile
-let initialPkgs = $attrs.__nu_packages
+let initialPkgs = $attrs.packages
 
 # Nushell attributes
 let nushell = {
@@ -24,12 +24,12 @@ let nushell = {
 
 # Derivation attributes
 let drv = {
-  name: $attrs.name,
-  system: $attrs.system,
-  src: (glob $"($attrs.src)/**/*"), # Sources to copy into sandbox
+  name: $attrs.name, # The name of the derivation
+  system: $attrs.system, # The build system
+  src: (glob $"($attrs.src)/**/*"), # Sources to copy into the sandbox
   outputs: ($attrs.outputs | transpose key value),
   initialPackages: $initialPkgs, # Packages added by user
-  # The __nu_packages environment variable is a space-separated string. This
+  # The packages environment variable is a space-separated string. This
   # pipeline converts it into a list.
   packages: (
     $initialPkgs
@@ -57,6 +57,7 @@ if $nix.debug {
 
   info $"Using Nushell (blue $nushell.version)"
 
+  # Nix throws an error if the outputs array is empty, so we don't need to handle that case
   info "Declared build outputs:"
   for output in $drv.outputs { item $output.key }
 }
@@ -76,13 +77,13 @@ if not ($drv.initialPackages | is-empty) {
   }
 }
 
-# Collect all packages into a string and set PATH
+# Collect all packages into a string and set the PATH
 if $nix.debug { info $"Setting (purple "PATH")" }
 
 let packagesPath = (
   $drv.packages                  # List of strings
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
-  | str collect (char esep)      # Collect into a single colon-separate string
+  | str collect (char esep)      # Collect into a single colon-separated string
 )
 let-env PATH = $packagesPath
 
@@ -90,7 +91,7 @@ let-env PATH = $packagesPath
 # list by removing reserved attributes (name, system, build, src, system, etc.).
 let numAttrs = ($drv.extraAttrs | length)
 
-if not ($numAttrs == 0) {
+if $numAttrs != 0 {
   if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
 
   for attr in $drv.extraAttrs {
@@ -99,7 +100,7 @@ if not ($numAttrs == 0) {
   }
 }
 
-# Copy sources
+# Copy sources into sandbox
 if $nix.debug { info "Copying sources" }
 for src in $drv.src { cp -r $src $nix.sandbox }
 
@@ -111,9 +112,7 @@ if $nix.debug {
 for output in ($drv.outputs) {
   let name = ($output | get key)
   let value = ($output | get value)
-
   if $nix.debug { item $"(yellow $name) = \"($value)\"" }
-
   let-env $name = $value
 }
 
@@ -123,12 +122,12 @@ if $nix.debug { banner "REALISATION" }
 ## Realisation phases (just build and install for now, more later)
 
 # Run a derivation phase (skip if empty)
-def runPhase [
+def run-phase [
   name: string,
 ] {
-  let phase = ($attrs | get $name)
+  if $name in $attrs {
+    let phase = ($attrs | get $name)
 
-  if not ($phase | is-empty) {
     if $nix.debug { info $"Running (blue $name) phase" }
       # We need to source the envFile prior to each phase so that custom Nushell
       # commands are registered. Right now there's a single env file but in
@@ -147,18 +146,20 @@ def runPhase [
   }
 }
 
-# The available phases
+# The available phases (just one for now)
 for phase in [
   "build"
-] { runPhase $phase }
+] { run-phase $phase }
 
 ## Run if realisation succeeds
 if $nix.debug {
-  banner "DONE!"
+  info "Outputs written:"
 
   for output in ($drv.outputs) {
     let name = ($output | get key)
     let value = ($output | get value)
-    item $"(yellow $name) output written to (purple $value)"
+    item $"(yellow $name) to (purple $value)"
   }
+
+  banner "DONE!"
 }

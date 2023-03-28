@@ -10,6 +10,7 @@ def yellow [msg: string] { color "yellow" $msg }
 
 def banner [text: string] { $"(red ">>>") (green $text)" }
 def info [msg: string] { $"(blue ">") ($msg)" }
+def error [msg: string] { $"(red "ERROR") ($msg)" }
 def item [msg: string] { $"(purple "+") ($msg)"}
 
 # Misc helpers
