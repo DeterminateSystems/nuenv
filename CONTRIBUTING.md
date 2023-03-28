@@ -1,5 +1,12 @@
 # Contributing to Nuenv
 
-At the moment, we don't have any big, bold plans for Nuenv but we're certainly
-keen on gauging community interest and seeing where things lead. Feel free to
-file [issues](/issues) to report errors or suggest improvements.
+We don't have any big, bold plans for Nuenv at the moment but we're keen on gauging community interest and seeing where things lead.
+Feel free to:
+
+- [File issues][issues]
+- Open [pull requests][prs]
+- Participate in [discussions]
+
+[discussions]: https://github.com/DeterminateSystems/nuenv/discussions
+[issues]: https://github.com/DeterminateSystems/nuenv/issues
+[prs]: https://github.com/DeterminateSystems/nuenv/prs

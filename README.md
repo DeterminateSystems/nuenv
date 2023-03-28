@@ -113,6 +113,10 @@ Here's a straightforward example:
 }
 ```
 
+## Contribute
+
+Interested in contributing to Nushell? Check out the [contribution guide](./CONTRIBUTING.md) for more info.
+
 [bash]: https://gnu.org/software/bash
 [blog]: https://determinate.systems/posts
 [derivation]: https://zero-to-nix.com/concepts/derivations
