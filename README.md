@@ -99,6 +99,7 @@ Here's a straightforward example:
         name = "hello";
         src = ./.;
         inherit system;
+        packages = with pkgs; [ hello ];
         # This script is Nushell, not Bash
         build = ''
           hello --greeting $"($env.MESSAGE)" | save hello.txt
