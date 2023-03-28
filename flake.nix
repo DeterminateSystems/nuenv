@@ -62,15 +62,11 @@
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
-          packages = with pkgs; [ nushell self.packages.${system}.hello-wasm ];
+          packages = with pkgs; [ nushell ];
         };
 
         ci = pkgs.mkShell {
           packages = with pkgs; [ cachix direnv nushell ];
-        };
-
-        wasm = pkgs.mkShell {
-          packages = with pkgs; [ nushell rustToolchain wasmtime ];
         };
 
         # A dev environment with Nuenv's helper functions available
@@ -121,42 +117,6 @@
           debug = false;
           MESSAGE = "Hello from Nix + Bash, but no debugging this time";
         };
-
-        wasm =
-          let
-            # An example of building a wrapper around Nuenv
-            buildRustWasm =
-              { name
-              , src
-              , target ? "wasm32-wasi"
-              , bin ? name
-              , rust
-              , debug ? false
-              }: pkgs.nuenv.mkDerivation {
-                inherit debug name src;
-                packages = [ rust ];
-                build = ''
-                  let bin = $"($env.out)/bin"
-                  log $"Creating bin output directory at ($bin)"
-                  mkdir $bin
-                  log $"Building with (cargo --version)"
-                  cargo build --target ${target} --release
-                  log $"Copying Wasm binary to ($bin)"
-                  cp target/wasm32-wasi/release/${bin}.wasm $bin
-                '';
-              };
-          in
-          buildRustWasm {
-            name = "nix-nushell-rust-wasm";
-            src = ./rust-wasm-example;
-            bin = "rust-wasm-example";
-            rust = pkgs.rustToolchain;
-            debug = true;
-          };
-
-        hello-wasm = pkgs.writeScriptBin "hello-wasm" ''
-          ${pkgs.wasmtime}/bin/wasmtime ${self.packages.${system}.wasm}/bin/rust-wasm-example.wasm "''${@}"
-        '';
 
         # A non-overlay version
         direct = self.lib.mkNushellDerivation pkgs.nushell system {
