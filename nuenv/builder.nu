@@ -65,15 +65,15 @@ if $nix.debug {
 ## Set up the environment
 if $nix.debug { banner "SETUP" }
 
-# Add general packages to PATH
-if not ($drv.initialPackages | is-empty) {
+# Log user-added packages if debug is set
+if (not ($drv.initialPackages | is-empty)) and $nix.debug {
   let numPackages = ($drv.initialPackages | length)
 
-  if $nix.debug { info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:" }
+  info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
 
   for pkg in $drv.initialPackages {
     let name = getPkgName $nix.store $pkg
-    if $nix.debug { item $name }
+    item $name
   }
 }
 
