@@ -30,7 +30,6 @@
         "__nu_debug"
         "__nu_env"
         "__nu_extra_attrs"
-        "__nu_extra_attrs"
         "__nu_nushell"
       ];
 
@@ -54,10 +53,10 @@
 
       # Attributes passed to the environment (prefaced with __nu_ to avoid naming collisions)
       __nu_builder = ../nuenv/builder.nu;
-      __nu_nushell = "${nushell}/bin/nu";
       __nu_debug = debug;
       __nu_env = [ ../nuenv/env.nu ];
       __nu_extra_attrs = extraAttrs;
+      __nu_nushell = "${nushell}/bin/nu";
     } // extraAttrs);
 
   # An analogue to writeScriptBin but for Nushell rather than Bash scripts.
