@@ -19,6 +19,10 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 With Nix installed, you can [realise] a Nix [derivation] that uses Nuenv instead of stdenv:
 
 ```shell
+nix build --print-build-logs github:DeterminateSystems/nuenv
+
+# Or run it inside the repo
+git clone https://github.com/DeterminateSystems/nuenv && cd nuenv
 nix build --print-build-logs
 ```
 
