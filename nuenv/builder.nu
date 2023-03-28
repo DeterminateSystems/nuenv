@@ -18,7 +18,7 @@ let initialPkgs = $attrs.packages
 # Nushell attributes
 let nushell = {
   version: (version).version, # Nushell version
-  pkg: (get-pkg-root $attrs.builder), # Nushell package path
+  pkg: (getPkgRoot $attrs.builder), # Nushell package path
   userEnvFile: $attrs.envFile # Functions that users can apply in realisation phases
 }
 
@@ -43,7 +43,7 @@ let drv = {
 let nix = {
   sandbox: $env.NIX_BUILD_TOP, # Sandbox directory
   store: $env.NIX_STORE, # Nix store root
-  debug: (env-to-bool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
+  debug: (envToBool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
 }
 
 ## Provide info about the current derivation
@@ -72,7 +72,7 @@ if not ($drv.initialPackages | is-empty) {
   if $nix.debug { info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:" }
 
   for pkg in $drv.initialPackages {
-    let name = get-pkg-name $nix.store $pkg
+    let name = getPkgName $nix.store $pkg
     if $nix.debug { item $name }
   }
 }
@@ -122,7 +122,7 @@ if $nix.debug { banner "REALISATION" }
 ## Realisation phases (just build and install for now, more later)
 
 # Run a derivation phase (skip if empty)
-def run-phase [
+def runPhase [
   name: string,
 ] {
   if $name in $attrs {
@@ -149,7 +149,7 @@ def run-phase [
 # The available phases (just one for now)
 for phase in [
   "build"
-] { run-phase $phase }
+] { runPhase $phase }
 
 ## Run if realisation succeeds
 if $nix.debug {

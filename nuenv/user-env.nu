@@ -19,21 +19,6 @@ def relativePath [
   }
 }
 
-# Display the exit code from the previous operation.
-def exit-code [] {
-  $env.LAST_EXIT_CODE
-}
-
-# Display whether the previous operation was a success.
-def was-success [] {
-  $env.LAST_EXIT_CODE == 0
-}
-
-# Display whether the previous operation errored.
-def was-failure [] {
-  $env.LAST_EXIT_CODE != 0
-}
-
 # Display the <msg> in a pretty way.
 def log [
   msg: string # The message to log.
