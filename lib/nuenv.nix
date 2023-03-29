@@ -78,7 +78,9 @@
       # The {} at the end is a workaround for this: https://github.com/nushell/nushell/issues/7959
       text = ''
         #!${nu}
+
         ${script}
+
         {}
       '';
       executable = true;
