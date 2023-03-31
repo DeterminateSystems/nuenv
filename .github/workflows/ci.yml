@@ -7,7 +7,6 @@ on:
       - main
 
 jobs:
-  # Build the Docker image using Nix
   build:
     strategy:
       matrix:
