@@ -21,6 +21,9 @@ With Nix installed, you can [realise] a Nix [derivation]:
 
 ```shell
 nix build --print-build-logs
+
+# Or without cloning this repo
+nix build --print-build-logs "github:DeterminateSystems/nuenv"
 ```
 
 You should see build output like this:
