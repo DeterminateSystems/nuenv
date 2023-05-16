@@ -67,6 +67,7 @@
     { name
     , script
     , bin ? name
+    , _appendTable ? false
     }:
 
     let
@@ -80,9 +81,7 @@
         #!${nu}
 
         ${script}
-
-        {}
-      '';
+      '' + (if _appendTable then "\n{}" else "");
       executable = true;
     };
 }
