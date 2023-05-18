@@ -10,7 +10,7 @@ let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
 } else {
   $"($here)/.attrs.json"
 }
-let attrs = open $attrsJsonFile
+let attrs = (open $attrsJsonFile)
 
 # Copy all .nu helper files into the sandbox
 for file in $attrs.__nu_env {

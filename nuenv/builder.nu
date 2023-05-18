@@ -12,7 +12,7 @@ let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
   $"($env.NIX_BUILD_TOP)/.attrs.json"
 }
 
-let attrs = open $attrsJsonFile
+let attrs = (open $attrsJsonFile)
 let initialPkgs = $attrs.packages
 
 # Nushell attributes
@@ -72,7 +72,7 @@ if (not ($drv.initialPackages | is-empty)) and $nix.debug {
   info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
 
   for pkg in $drv.initialPackages {
-    let name = getPkgName $nix.store $pkg
+    let name = (getPkgName $nix.store $pkg)
     item $name
   }
 }
@@ -83,7 +83,7 @@ if $nix.debug { info $"Setting (purple "PATH")" }
 let packagesPath = (
   $drv.packages                  # List of strings
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
-  | str collect (char esep)      # Collect into a single colon-separated string
+  | str join (char esep)      # Collect into a single colon-separated string
 )
 let-env PATH = $packagesPath
 
@@ -129,18 +129,19 @@ def runPhase [
     let phase = ($attrs | get $name)
 
     if $nix.debug { info $"Running (blue $name) phase" }
-      # We need to source the envFile prior to each phase so that custom Nushell
-      # commands are registered. Right now there's a single env file but in
-      # principle there could be per-phase scripts.
-      do --capture-errors {
-        nu --env-config $nushell.userEnvFile --commands $phase
 
-        let code = $env.LAST_EXIT_CODE
+    # We need to source the envFile prior to each phase so that custom Nushell
+    # commands are registered. Right now there's a single env file but in
+    # principle there could be per-phase scripts.
+    do --capture-errors {
+      nu --env-config $nushell.userEnvFile --commands $phase
 
-        if $code != 0 {
-          exit --now $code
-        }
+      let exitCode = $env.LAST_EXIT_CODE
+
+      if $exitCode != 0 {
+        exit --now $exitCode
       }
+    }
   } else {
     if $nix.debug { info $"Skipping empty (blue $name) phase" }
   }

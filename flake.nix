@@ -2,7 +2,7 @@
   description = "Nuenv: a Nushell environment for Nix";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/0cd51a933d91078775b300cf0f29aa3495231aa2"; # Provides Nushell v0.77.1
+    nixpkgs.url = "github:NixOS/nixpkgs"; # Provides Nushell v0.79.0
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -85,8 +85,8 @@
           name = "run-me";
           script = ''
             def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
-            def info [msg: string] { $"(color "blue" "INFO"): ($msg)" }
-            def success [msg: string] { $"(color "green" "SUCCESS"): ($msg)" }
+            def info [msg: string] { print $"(color "blue" "INFO"): ($msg)" }
+            def success [msg: string] { print $"(color "green" "SUCCESS"): ($msg)" }
 
             info "Running script"
             info "Something else is happening now"

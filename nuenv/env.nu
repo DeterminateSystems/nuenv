@@ -8,10 +8,10 @@ def red [msg: string] { color "red" $msg }
 def purple [msg: string] { color "purple" $msg }
 def yellow [msg: string] { color "yellow" $msg }
 
-def banner [text: string] { $"(red ">>>") (green $text)" }
-def info [msg: string] { $"(blue ">") ($msg)" }
-def error [msg: string] { $"(red "ERROR") ($msg)" }
-def item [msg: string] { $"(purple "+") ($msg)"}
+def banner [text: string] { print $"(red ">>>") (green $text)" }
+def info [msg: string] { print $"(blue ">") ($msg)" }
+def error [msg: string] { print $"(red "ERROR") ($msg)" }
+def item [msg: string] { print $"(purple "+") ($msg)"}
 
 # Misc helpers
 
