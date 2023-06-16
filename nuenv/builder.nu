@@ -139,7 +139,7 @@ def runPhase [
       let exitCode = $env.LAST_EXIT_CODE
 
       if $exitCode != 0 {
-        exit --now $exitCode
+        exit $exitCode
       }
     }
   } else {
