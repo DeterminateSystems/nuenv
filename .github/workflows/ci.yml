@@ -7,6 +7,17 @@ on:
       - main
 
 jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+
+      - name: Check Nixpkgs input
+        uses: DeterminateSystems/flake-checker-action@v3
+        with:
+          fail-mode: true
+
   build:
     strategy:
       matrix:
@@ -16,11 +27,6 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v3
-
-      - name: Check Nixpkgs input
-        uses: DeterminateSystems/flake-checker-action@v3
-        with:
-          fail-mode: true
 
       - uses: DeterminateSystems/nix-installer-action@v1
         with:
