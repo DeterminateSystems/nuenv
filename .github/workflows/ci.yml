@@ -18,6 +18,12 @@ jobs:
         with:
           fail-mode: true
 
+      - uses: DeterminateSystems/nix-installer-action@v4
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v4
+
+      - run: nix flake check
+
   build:
     strategy:
       matrix:
@@ -28,23 +34,15 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v3
 
-      - uses: DeterminateSystems/nix-installer-action@v1
-        with:
-          extra-conf: |
-            binary-caches = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= ${{ secrets.CACHIX_TRUSTED_PUBLIC_KEY }}
-            trusted-substituters = https://cache.nixos.org https://${{ secrets.CACHIX_CACHE }}.cachix.org
+      - uses: DeterminateSystems/nix-installer-action@v4
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v1
 
       - name: Set up Nix environment
         run: |
           nix develop ".#ci" --command direnv allow
           eval "$(nix develop ".#ci" --command direnv export bash)"
           echo "$PATH" >> $GITHUB_PATH
-
-      - name: Binary cache setup
-        run: |
-          cachix authtoken ${{ secrets.CACHIX_AUTH_TOKEN }}
-          cachix use ${{ secrets.CACHIX_CACHE }}
 
       - name: Build Nuenv derivation
         run: |
@@ -76,13 +74,3 @@ jobs:
           nix build --print-build-logs .#stdenv
           cat result/share/hello.txt
 
-      - name: Cache development environment
-        run: |
-          nix develop ".#ci" --profile nuenv-ci-profile
-          cachix push ${{ secrets.CACHIX_CACHE }} nuenv-ci-profile
-
-      - name: Cache build artifacts
-        run: |
-          nix flake archive --json \
-            | jq -r '.path,(.inputs|to_entries[].value.path)' \
-            | cachix push "${{ secrets.CACHIX_CACHE }}"
