@@ -20,7 +20,7 @@ jobs:
 
       - uses: DeterminateSystems/nix-installer-action@v4
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v4
+      - uses: DeterminateSystems/magic-nix-cache-action@v1
 
       - run: nix flake check
 
