@@ -69,8 +69,11 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
 ```nix
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/release-22.11";
-    nuenv.url = "github:DeterminateSystems/nuenv";
+    nixpkgs.url = "github:NixOS/nixpkgs/7409480d5c8584a1a83c422530419efe4afb0d19";
+    nuenv = {
+      url = "github:DeterminateSystems/nuenv";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nuenv }: let
