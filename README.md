@@ -2,15 +2,15 @@
 
 ![GitHub Actions status badge](https://github.com/DeterminateSystems/nuenv/actions/workflows/ci.yml/badge.svg?branch=main)
 
-> **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for
-> others&mdash;but not something you should use for any serious purpose.
+> **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for others&mdash;but not something you should use for any serious purpose.
 
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
 For more information, check out [Nuenv: an experimental Nushell environment for Nix][post] on the [Determinate Systems blog][blog].
 
 ## Running the scenario
 
-First, make sure that you have [Nix] installed with [flakes enabled][flake]. We recommend using the [Determinate Nix Installer][dni]:
+First, make sure that you have [Nix] installed with [flakes enabled][flake].
+We recommend using our [Determinate Nix Installer][dni]:
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
@@ -60,20 +60,20 @@ cat ./result/share/hello.txt
 
 ## How it works
 
-The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash]. The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment. In addition to `builder.nu`, [`env.nu`](./env.nu) provides helper functions to your realisation scripts.
+The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash].
+The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment.
+In addition to `builder.nu`, [`env.nu`](./env.nu) provides helper functions to your realisation scripts.
 
 ## Try it out
 
-You can use nuenv to realise your own derivations. Here's a straightforward example:
+You can use nuenv to realise your own derivations.
+Here's a straightforward example:
 
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/7409480d5c8584a1a83c422530419efe4afb0d19";
-    nuenv = {
-      url = "github:DeterminateSystems/nuenv";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    nuenv.url = "github:DeterminateSystems/nuenv";
   };
 
   outputs = { self, nixpkgs, nuenv }: let
@@ -90,6 +90,7 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
         src = ./.;
         inherit system;
         # This script is Nushell, not Bash
+        packages = with pkgs; [ hello ];
         build = ''
           hello --greeting $"($env.MESSAGE)" | save hello.txt
           let out = $"($env.out)/share"
@@ -101,6 +102,13 @@ You can use nuenv to realise your own derivations. Here's a straightforward exam
     });
   };
 }
+```
+
+To build and view the result of this derivation:
+
+```shell
+nix build
+cat ./result/share/hello.txt
 ```
 
 ## Creating Nushell scripts
