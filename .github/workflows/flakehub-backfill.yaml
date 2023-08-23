@@ -1,4 +1,4 @@
-name: "Push to FlakeHub (manual)"
+name: "Publish to FlakeHub (manual)"
 
 on:
   workflow_dispatch:

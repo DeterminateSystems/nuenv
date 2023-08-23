@@ -1,3 +1,5 @@
+name: "Publish to FlakeHub (automated per tag)"
+
 on:
   push:
     tags:
