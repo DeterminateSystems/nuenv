@@ -142,9 +142,7 @@ def runPhase [
         exit $exitCode
       }
     }
-  } else {
-    if $nix.debug { info $"Skipping empty (blue $name) phase" }
-  }
+  } else if $nix.debug { info $"Skipping empty (blue $name) phase" }
 }
 
 # The available phases (just one for now)
