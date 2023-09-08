@@ -113,7 +113,7 @@ cat ./result/share/hello.txt
 
 ## Creating Nushell scripts
 
-Nuenv has a `mkScript` function that you can use to wrap [Nushell] scripts using Nix.
+Nuenv has a `writeScriptBin` function that you can use to wrap [Nushell] scripts using Nix.
 Here's an example:
 
 ```nix
@@ -130,7 +130,7 @@ Here's an example:
       overlays = [ nuenv.overlays.nuenv ];
     };
   in {
-    packages.x86_64-linux.run-me = pkgs.nuenv.mkScript {
+    packages.x86_64-linux.run-me = pkgs.nuenv.writeScriptBin {
       name = "run-me";
       script = ''
         def blue [msg: string] { $"(ansi blue)($msg)(ansi reset)" }
@@ -141,7 +141,7 @@ Here's an example:
 }
 ```
 
-`mkScript` serves the same purpose as [`writeScriptBin`][writescriptbin] but for Nushell instead of [Bash].
+`writeScriptBin` serves the same purpose as [`writeScriptBin`][writescriptbin] in the Nixpkgs standard environment but for Nushell instead of [Bash].
 
 [bash]: https://gnu.org/software/bash
 [blog]: https://determinate.systems/posts

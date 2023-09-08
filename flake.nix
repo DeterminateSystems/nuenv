@@ -43,7 +43,7 @@
               # Provide default system
               prev.system;
 
-            mkScript = self.lib.mkNushellScript
+            writeScriptBin = self.lib.mkNushellScript
               # Provide Nushell package
               prev.nushell
               # Provide helper function
@@ -81,7 +81,7 @@
       packages = forAllSystems ({ pkgs, system }: rec {
         default = hello;
 
-        run-me = pkgs.nuenv.mkScript {
+        run-me = pkgs.nuenv.writeScriptBin {
           name = "run-me";
           script = ''
             def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
