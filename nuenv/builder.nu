@@ -69,7 +69,7 @@ if $nix.debug { banner "SETUP" }
 if (not ($drv.initialPackages | is-empty)) and $nix.debug {
   let numPackages = ($drv.initialPackages | length)
 
-  info $"Adding (blue $numPackages) package(plural $numPackages) to PATH:"
+  info $"Adding (blue ($numPackages | into string)) package(plural $numPackages) to PATH:"
 
   for pkg in $drv.initialPackages {
     let name = (getPkgName $nix.store $pkg)
@@ -92,7 +92,7 @@ let-env PATH = $packagesPath
 let numAttrs = ($drv.extraAttrs | length)
 
 if $numAttrs != 0 {
-  if $nix.debug { info $"Setting (blue $numAttrs) user-supplied environment variable(plural $numAttrs):" }
+  if $nix.debug { info $"Setting (blue ($numAttrs | into string)) user-supplied environment variable(plural $numAttrs):" }
 
   for attr in $drv.extraAttrs {
     if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
@@ -107,7 +107,7 @@ for src in $drv.src { cp -r $src $nix.sandbox }
 # Set environment variables for all outputs
 if $nix.debug {
   let numOutputs = ($drv.outputs | length)
-  info $"Setting (blue $numOutputs) output environment variable(plural $numOutputs):"
+  info $"Setting (blue ($numOutputs | into string)) output environment variable(plural $numOutputs):"
 }
 for output in ($drv.outputs) {
   let name = ($output | get key)
@@ -134,11 +134,11 @@ def runPhase [
     # commands are registered. Right now there's a single env file but in
     # principle there could be per-phase scripts.
     do --capture-errors {
-      nu --env-config $nushell.userEnvFile --commands $phase
+      nu --log-level error --env-config $nushell.userEnvFile --commands $phase
 
       let exitCode = $env.LAST_EXIT_CODE
 
-      if $exitCode != 0 {
+      if ($exitCode | into int) != 0 {
         exit $exitCode
       }
     }
@@ -148,9 +148,9 @@ def runPhase [
 }
 
 # The available phases (just one for now)
-for phase in [
-  "build"
-] { runPhase $phase }
+let phases = [ "build" ]
+
+for phase in $phases { runPhase $phase }
 
 ## Run if realisation succeeds
 if $nix.debug {

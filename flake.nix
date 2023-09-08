@@ -99,9 +99,18 @@
           ${pkgs.nushell}/bin/nu --env-config ${./nuenv/user-env.nu} --commands "nuenvCommands"
         '';
 
-        # An example Nushell-based derivation
+        # For NixCon
         hello = pkgs.nuenv.mkDerivation {
           name = "hello-nix-nushell";
+          packages = [ pkgs.hello ];
+          src = ./.;
+          build = builtins.readFile ./example/hello.nu;
+          MESSAGE = "Servus, grüezi, hallo, und hallöchen";
+        };
+
+        # An example Nushell-based derivation
+        nixcon = pkgs.nuenv.mkDerivation {
+          name = "hello-nixcon";
           packages = [ pkgs.hello ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
