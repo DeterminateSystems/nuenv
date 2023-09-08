@@ -86,11 +86,14 @@
           script = ''
             def color [color: string, msg: string] { $"(ansi $color)($msg)(ansi reset)" }
             def info [msg: string] { print $"(color "blue" "INFO"): ($msg)" }
-            def success [msg: string] { print $"(color "green" "SUCCESS"): ($msg)" }
+            def success [msg: string] { print $"(color "green" $msg)" }
 
-            info "Running script"
-            info "Something else is happening now"
-            info "Nearing completion"
+            info $"Hello, NixCon (date now | date format "%Y")!"
+            info "So lovely to see everyone today"
+            info "Conference status:"
+            success "SUCCESS"
+            info "Nearing completion..."
+            info "Script status:"
             success "DONE"
           '';
         };
