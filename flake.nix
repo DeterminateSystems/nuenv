@@ -105,7 +105,7 @@
           packages = [ pkgs.hello ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
-          MESSAGE = "Servus, grüezi, hallo, und hallöchen";
+          MESSAGE = "Hello from Nix + Bash";
         };
 
         # An example Nushell-based derivation
@@ -114,7 +114,7 @@
           packages = [ pkgs.hello ];
           src = ./.;
           build = builtins.readFile ./example/hello.nu;
-          MESSAGE = "Hello from Nix + Bash";
+          MESSAGE = "NixCon ❄️! Servus, grüezi, hallo, und hallöchen 😄";
         };
 
         # The Nushell-based derivation above but with debug mode disabled

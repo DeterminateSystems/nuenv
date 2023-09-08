@@ -134,14 +134,14 @@ def runPhase [
     # commands are registered. Right now there's a single env file but in
     # principle there could be per-phase scripts.
     do --capture-errors {
-      nu --log-level error --env-config $nushell.userEnvFile --commands $phase
+      nu --log-level warn --env-config $nushell.userEnvFile --commands $phase
 
       let exitCode = $env.LAST_EXIT_CODE
 
       if ($exitCode | into int) != 0 {
         exit $exitCode
       }
-    }
+    } | default {} # To prevent `empty list` being displayed (until Nushell fixes this)
   } else if $nix.debug { info $"Skipping empty (blue $name) phase" }
 }
 
