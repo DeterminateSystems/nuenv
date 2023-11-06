@@ -54,11 +54,51 @@
         };
       };
 
-      lib = {
-        inherit (import ./lib/nuenv.nix)
-          mkNushellDerivation
-          mkNushellScript;
-      };
+      lib =
+        let internalLib = import ./lib/nuenv.nix;
+        in {
+          /*
+            mkNushellDerivation creates a nushell derivation builder
+
+            Type:
+              [package] -> [string] -> package
+              
+            Example:
+              let nushellBuilder = mkNuShellDerivation
+                pkgs.nushell
+                pkgs.stdenv.hostPlatform.system;
+          */
+          mkNushellDerivation =
+            # nushell package to use for derivation build environment
+            nushellPkg:
+            # system as a string
+            system:
+            internalLib.mkNushellDerivation nushellPkg system;
+
+          /*
+            mkNushellScript creates a nushell script builder
+
+            Type:
+              [string] -> [string] -> package
+              
+            Example:
+              let mkNushellScript = mkNushellScript
+                pkgs.nushell
+                pkgs.writeTextFile;
+              let outScript = mkNushellScript 
+                "repair-infra.nu"
+                ''
+                  print -e "(ansi red)fixing infrastructure(ansi reset)"
+                  print "dont_crash_anymore=true" | save -a server_config.toml
+                '';
+          */
+          mkNushellScript =
+            # nushell package to use for script shebang/execution
+            nushellPkg:
+            # function to use for writing out script (example: pkgs.writeTextFile)
+            writeTextFile:
+            internalLib.mkNushellScript nushellPkg writeTextFile;
+        };
 
       devShells = forAllSystems ({ pkgs, system }: {
         default = pkgs.mkShell {
