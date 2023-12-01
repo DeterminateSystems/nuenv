@@ -2,7 +2,7 @@
   description = "Nuenv: a Nushell environment for Nix";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Provides Nushell v0.81.0
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Provides Nushell v0.87.1
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
