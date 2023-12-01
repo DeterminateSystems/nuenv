@@ -1,6 +1,6 @@
 ## Utility commands
 
-source env.nu
+export use env.nu *
 
 ## Parse the build environment
 
@@ -85,7 +85,7 @@ let packagesPath = (
   | each { |pkg| $"($pkg)/bin" } # Append /bin to each package path
   | str join (char esep)      # Collect into a single colon-separated string
 )
-let-env PATH = $packagesPath
+$env.PATH = $packagesPath
 
 # Set user-supplied environment variables (à la FOO="bar"). Nix supplies this
 # list by removing reserved attributes (name, system, build, src, system, etc.).
@@ -96,13 +96,13 @@ if $numAttrs != 0 {
 
   for attr in $drv.extraAttrs {
     if $nix.debug { item $"(yellow $attr.key) = \"($attr.value)\"" }
-    let-env $attr.key = $attr.value
+    load-env {$attr.key: $attr.value}
   }
 }
 
 # Copy sources into sandbox
 if $nix.debug { info "Copying sources" }
-for src in $drv.src { cp -r $src $nix.sandbox }
+for src in $drv.src { cp -r -f $src $nix.sandbox }
 
 # Set environment variables for all outputs
 if $nix.debug {
@@ -113,7 +113,7 @@ for output in ($drv.outputs) {
   let name = ($output | get key)
   let value = ($output | get value)
   if $nix.debug { item $"(yellow $name) = \"($value)\"" }
-  let-env $name = $value
+  load-env {$name: $value}
 }
 
 ## The realisation process
