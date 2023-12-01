@@ -128,7 +128,7 @@
             def info [msg: string] { print $"(color "blue" "INFO"): ($msg)" }
             def success [msg: string] { print $"(color "green" $msg)" }
 
-            info $"Hello, NixCon (date now | date format "%Y")!"
+            info $"Hello, NixCon (date now | format date "%Y")!"
             info "So lovely to see everyone today"
             info "Conference status:"
             success "SUCCESS"
