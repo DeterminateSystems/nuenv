@@ -22,13 +22,15 @@ def relativePath [
 # Display the <msg> in a pretty way.
 def log [
   msg: string # The message to log.
-] { $"(ansi green)+(ansi reset) ($msg)" }
+] {
+  print $"(ansi green)+(ansi reset) ($msg)"
+}
 
 # Output the error <msg> in a flashy way.
 def err [
   msg: string # The error string to log
 ] {
-  $"(ansi red)ERROR(ansi reset): ($msg)"
+  print $"(ansi red)ERROR(ansi reset): ($msg)"
 }
 
 # Check that <file> exists and throw an error if it doesn't.
@@ -67,7 +69,7 @@ def substituteInPlace [
   --replace (-r): string, # The string to replace in <file>
   --with (-w): string # The replacement for <replace>
 ] {
-  $files | each { |file| substitute $file $file --replace $replace --with $with }
+  for $file in $files { substitute $file $file --replace $replace --with $with }
 }
 
 # Display Nuenv-specific commands.
