@@ -2,7 +2,7 @@
   description = "Nuenv: a Nushell environment for Nix";
 
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2305.*.tar.gz"; # Provides Nushell v0.81.0
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Provides Nushell v0.87.1
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -128,7 +128,7 @@
             def info [msg: string] { print $"(color "blue" "INFO"): ($msg)" }
             def success [msg: string] { print $"(color "green" $msg)" }
 
-            info $"Hello, NixCon (date now | date format "%Y")!"
+            info $"Hello, NixCon (date now | format date "%Y")!"
             info "So lovely to see everyone today"
             info "Conference status:"
             success "SUCCESS"

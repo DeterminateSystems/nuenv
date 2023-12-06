@@ -21,7 +21,7 @@ for file in $attrs.__nu_env {
 
 # Set the PATH so that Nushell itself is discoverable. The PATH will be
 # overwritten later.
-let-env PATH = ($attrs.__nu_nushell | parse "{root}/nu" | get root.0)
+$env.PATH = ($attrs.__nu_nushell | parse "{root}/nu" | get root.0)
 
 # Run the Nushell builder
 nu --commands (open $attrs.__nu_builder)
