@@ -2,7 +2,7 @@
   description = "Nuenv: a Nushell environment for Nix";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Provides Nushell v0.87.1
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz"; # Provides Nushell v0.87.1
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -62,7 +62,7 @@
 
             Type:
               [package] -> [string] -> package
-              
+
             Example:
               let nushellBuilder = mkNuShellDerivation
                 pkgs.nushell
@@ -80,12 +80,12 @@
 
             Type:
               [string] -> [string] -> package
-              
+
             Example:
               let mkNushellScript = mkNushellScript
                 pkgs.nushell
                 pkgs.writeTextFile;
-              let outScript = mkNushellScript 
+              let outScript = mkNushellScript
                 "repair-infra.nu"
                 ''
                   print -e "(ansi red)fixing infrastructure(ansi reset)"
