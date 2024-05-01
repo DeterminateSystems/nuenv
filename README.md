@@ -24,7 +24,7 @@ With Nix installed, you can [realise] a Nix [derivation]:
 nix build --print-build-logs
 
 # Or without cloning this repo
-nix build --print-build-logs "github:DeterminateSystems/nuenv"
+nix build --print-build-logs "https://flakehub.com/f/DeterminateSystems/nuenv/*.tar.gz"
 ```
 
 You should see build output like this:
@@ -73,8 +73,8 @@ Here's a straightforward example:
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
-    nuenv.url = "github:DeterminateSystems/nuenv";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.*.tar.gz";
+    nuenv.url = "https://:flakehub.com/f/DeterminateSystems/nuenv/*.tar.gz";
   };
 
   outputs = { self, nixpkgs, nuenv }: let
@@ -121,8 +121,8 @@ Here's an example:
 # This example is only for x86_64-linux; adjust for your own platform
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    nuenv.url = "github:DeterminateSystems/nuenv";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.*.tar.gz";
+    nuenv.url = "https://:flakehub.com/f/DeterminateSystems/nuenv/*.tar.gz";
   };
 
   outputs = { self, nixpkgs, nuenv }: let
