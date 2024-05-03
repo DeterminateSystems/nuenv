@@ -74,7 +74,7 @@ Here's a straightforward example:
 {
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.*.tar.gz";
-    nuenv.url = "https://:flakehub.com/f/DeterminateSystems/nuenv/*.tar.gz";
+    nuenv.url = "https://flakehub.com/f/DeterminateSystems/nuenv/*.tar.gz";
   };
 
   outputs = { self, nixpkgs, nuenv }: let
