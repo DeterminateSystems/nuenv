@@ -4,12 +4,7 @@
 # Discover and load the .attrs.json file, which supplies Nuenv with all the
 # information it needs to realise the derivation.
 let here = $env.NIX_BUILD_TOP
-
-let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
-  $env.NIX_ATTRS_JSON_FILE
-} else {
-  $"($here)/.attrs.json"
-}
+let attrsJsonFile = ($env.NIX_ATTRS_JSON_FILE? | default $"($here)/.attrs.json")
 let attrs = (open $attrsJsonFile)
 
 # Copy all .nu helper files into the sandbox

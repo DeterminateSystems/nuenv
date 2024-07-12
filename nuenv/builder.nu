@@ -6,13 +6,10 @@ export use env.nu *
 
 # This branching is a necessary workaround for a bug in the Nix CLI fixed in
 # https://github.com/NixOS/nix/pull/8053
-let attrsJsonFile = if ($env.NIX_ATTRS_JSON_FILE | path exists) {
-  $env.NIX_ATTRS_JSON_FILE
-} else {
-  $"($env.NIX_BUILD_TOP)/.attrs.json"
-}
-
+let here = $env.NIX_BUILD_TOP
+let attrsJsonFile = ($env.NIX_ATTRS_JSON_FILE? | default $"($here)/.attrs.json")
 let attrs = (open $attrsJsonFile)
+
 let initialPkgs = $attrs.packages
 
 # Nushell attributes
@@ -43,7 +40,7 @@ let drv = {
 let nix = {
   sandbox: $env.NIX_BUILD_TOP, # Sandbox directory
   store: $env.NIX_STORE, # Nix store root
-  debug: (envToBool $attrs.__nu_debug) # Whether `debug = true` is set in the derivation
+  debug: $attrs.__nu_debug # Whether `debug = true` is set in the derivation
 }
 
 ## Provide info about the current derivation
@@ -53,7 +50,7 @@ if $nix.debug {
   info $"Realising the (blue $drv.name) derivation for (blue $drv.system)"
 
   let numCores = ($env.NIX_BUILD_CORES | into int)
-  info $"Running on (blue $numCores) core(if ($numCores > 1) { "s" })"
+  info $"Running on (blue ($numCores | into string)) core(if ($numCores > 1) { "s" })"
 
   info $"Using Nushell (blue $nushell.version)"
 
