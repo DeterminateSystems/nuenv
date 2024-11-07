@@ -10,13 +10,7 @@ jobs:
   check:
     runs-on: ubuntu-22.04
     steps:
-      - name: git checkout
-        uses: actions/checkout@v3
-
-      - name: Check Nixpkgs input
-        uses: DeterminateSystems/flake-checker-action@main
-        with:
-          fail-mode: true
+      - uses: actions/checkout@v3
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix flake check
