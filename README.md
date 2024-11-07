@@ -62,8 +62,8 @@ cat ./result/share/hello.txt
 ## How it works
 
 The key differentiator from regular Nix here is that realisation happens in [Nushell] scripts rather than in [Bash].
-The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./builder.nu) script that provides the Nix environment.
-In addition to `builder.nu`, [`env.nu`](./env.nu) provides helper functions to your realisation scripts.
+The project's [flake] outputs a function called `mkNushellDerivation` that wraps Nix's built-in [`derivation`][derivation] function but, in contrast to [`stdenv.mkDerivation`][stdenv], uses Nushell as the `builder`, which in turn runs a [`builder.nu`](./nuenv/builder.nu) script that provides the Nix environment.
+In addition to `builder.nu`, [`env.nu`](./nuenv/env.nu) provides helper functions to your realisation scripts.
 
 ## Try it out
 
