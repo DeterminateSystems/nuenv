@@ -49,6 +49,8 @@
               # Provide helper function
               prev.writeTextFile;
 
+            writeShellApplication = final.callPackage ./lib/writeShellApplication.nix { };
+
             # TODO: mkShell
           };
         };
@@ -98,6 +100,35 @@
             # function to use for writing out script (example: pkgs.writeTextFile)
             writeTextFile:
             internalLib.mkNushellScript nushellPkg writeTextFile;
+
+          /*
+            mkNushellScriptApplication creates a nushell script builder
+
+            Type:
+              [string] -> [string] -> package
+
+            Example:
+              let mkNushellScript = mkNushellScript
+                pkgs.nushell
+                pkgs.writeTextFile;
+              let outScript = mkNushellScript
+                "repair-infra.nu"
+                ''
+                  print -e "(ansi red)fixing infrastructure(ansi reset)"
+                  print "dont_crash_anymore=true" | save -a server_config.toml
+                '';
+          */
+          mkNushellScriptApplication =
+            # nushell package to use for script shebang/execution
+            nushellPkg:
+            # function to use for writing out script (example: pkgs.writeTextFile)
+            writeTextFile:
+            # nixpkgs helper functions, e.g. pkgs.lib
+            lib:
+            import ./lib/writeShellApplication.nix {
+              inherit writeTextFile lib;
+              nushell = nushellPkg;
+            };
         };
 
       devShells = forAllSystems ({ pkgs, system }: {
