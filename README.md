@@ -3,7 +3,10 @@
 [![FlakeHub](https://img.shields.io/endpoint?url=https://flakehub.com/f/DeterminateSystems/nuenv/badge)](https://flakehub.com/flake/DeterminateSystems/nuenv)
 ![GitHub Actions status badge](https://github.com/DeterminateSystems/nuenv/actions/workflows/ci.yml/badge.svg?branch=main)
 
-> **Warning**: This project is a fun experiment&mdash;and perhaps a source of inspiration for others&mdash;but not something you should use for any serious purpose.
+> [!INFO]
+> Nuenv was a fun and instructive experiment but we don't plan to develop it further at this time, so we've opted to archive this repository.
+> To read more about Nuenv, see the [Nuenv: an experimental Nushell environment for Nix][post] blog post on the [Determinate Systems blog][blog] and the [Nuenv: an experimental derivation builder for Nix][talk] talk at NixCon 2023.
+> Going forward, you're free to use this project [as you see fit](./LICENSE)!
 
 This repo houses an example project that uses [Nushell] as an alternative builder for [Nix] (whose standard environment uses [Bash]).
 For more information, check out [Nuenv: an experimental Nushell environment for Nix][post] on the [Determinate Systems blog][blog].
@@ -18,7 +21,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
   | sh -s -- install
 ```
 
-With Nix installed, you can [realise] a Nix [derivation]:
+With Nix installed, you can [realise] a Nix [derivation] that uses Nushell rather than Bash:
 
 ```shell
 nix build --print-build-logs
@@ -155,4 +158,5 @@ Here's an example:
 [post]: https://determinate.systems/posts/nuenv
 [realise]: https://zero-to-nix.com/concepts/realisation
 [stdenv]: https://ryantm.github.io/nixpkgs/stdenv/stdenv
+[talk]: https://www.youtube.com/watch?v=QwElUltNsq0
 [writescriptbin]: https://ryantm.github.io/nixpkgs/builders/trivial-builders/#trivial-builder-writeText
